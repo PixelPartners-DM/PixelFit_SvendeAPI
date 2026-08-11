@@ -1,0 +1,6 @@
+@PixelFit_SvendeAPI_HostAddress = http://localhost:5244
+
+GET {{PixelFit_SvendeAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
