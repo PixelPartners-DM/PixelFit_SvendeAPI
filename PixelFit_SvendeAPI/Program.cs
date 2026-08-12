@@ -54,7 +54,8 @@ app.MapGet("/health", () => Results.Ok("Healthy"));
 // Must run before calls that rely on scheme/IP
 app.UseForwardedHeaders();
 
-app.UseHttpsRedirection();
+// Til https senere.
+//app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
