@@ -45,8 +45,8 @@ var app = builder.Build();
 
 
 // Det her gør swagger tilgængeligt i produktion, så kan man tilgå API'et i en browser.
-app.UseSwagger();
-app.UseSwaggerUI();
+//app.UseSwagger();
+//app.UseSwaggerUI();
 
 // Health check endpoint
 app.MapGet("/health", () => Results.Ok("Healthy"));
