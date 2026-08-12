@@ -48,6 +48,9 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
+// Health check endpoint
+app.MapGet("/health", () => Results.Ok("Healthy"));
+
 // Must run before calls that rely on scheme/IP
 app.UseForwardedHeaders();
 
