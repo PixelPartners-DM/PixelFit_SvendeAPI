@@ -1,5 +1,8 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using PixelFit_SvendeAPI.Data;
 using PixelFit_SvendeAPI.Models;
 using PixelFit_SvendeAPI.Repositories;
@@ -8,42 +11,122 @@ using PixelFit_SvendeAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Tilføjer Controllers til REST API'et
 builder.Services.AddControllers();
+
+// Tilføjer Swagger til test af API'et
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Use SQL Server LocalDB. Ensure appsettings.json contains DefaultConnection (shown below).
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Forbinder API'et til SQL Server
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    );
+});
+
+
+// ASP.NET Identity bruges til brugere og password hashing
 builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 {
+    // Email skal være unik
     options.User.RequireUniqueEmail = true;
+
+    // Password regler
     options.Password.RequiredLength = 6;
     options.Password.RequireDigit = false;
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = false;
 })
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
+.AddEntityFrameworkStores<ApplicationDbContext>()
+.AddDefaultTokenProviders();
 
-// register repo/service implementations (update their signatures to use int)
+
+// Registrerer JWT authentication
+builder.Services
+    .AddAuthentication(options =>
+    {
+        // JWT bruges som standard authentication
+        options.DefaultAuthenticateScheme =
+            JwtBearerDefaults.AuthenticationScheme;
+
+        options.DefaultChallengeScheme =
+            JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        // Fortæller API'et hvordan JWT-tokenet skal valideres
+        options.TokenValidationParameters =
+            new TokenValidationParameters
+            {
+                // Kontrollerer hvem der har lavet tokenet
+                ValidateIssuer = true,
+
+                // Kontrollerer hvem tokenet er lavet til
+                ValidateAudience = true,
+
+                // Kontrollerer at tokenet ikke er udløbet
+                ValidateLifetime = true,
+
+                // Kontrollerer JWT-signaturen
+                ValidateIssuerSigningKey = true,
+
+                // Skal matche værdien i appsettings.json
+                ValidIssuer =
+                    builder.Configuration["Jwt:Issuer"],
+
+                // Skal matche værdien i appsettings.json
+                ValidAudience =
+                    builder.Configuration["Jwt:Audience"],
+
+                // Den hemmelige nøgle bruges til at validere signaturen
+                IssuerSigningKey =
+                    new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(
+                            builder.Configuration["Jwt:Key"]!
+                        )
+                    )
+            };
+    });
+
+
+// Dependency Injection til bruger repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+// Dependency Injection til bruger service
 builder.Services.AddScoped<IUserService, UserService>();
+
+// Registrerer vores service som laver JWT tokens
+builder.Services.AddScoped<JwtService>();
+
 
 var app = builder.Build();
 
+
+// Swagger bruges kun under udvikling
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+
+// Tvinger HTTP requests over på HTTPS
 app.UseHttpsRedirection();
 
+
+// Tjekker hvem brugeren er ud fra fx. JWT-token
 app.UseAuthentication();
+
+// Tjekker hvad brugeren har adgang til
 app.UseAuthorization();
 
+
+// Aktiverer vores Controllers
 app.MapControllers();
 
+
+// Starter API'et
 app.Run();
