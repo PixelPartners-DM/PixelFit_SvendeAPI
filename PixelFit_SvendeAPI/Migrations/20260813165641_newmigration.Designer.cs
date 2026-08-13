@@ -12,7 +12,7 @@ using PixelFit_SvendeAPI.Data;
 namespace PixelFit_SvendeAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260811080436_newmigration")]
+    [Migration("20260813165641_newmigration")]
     partial class newmigration
     {
         /// <inheritdoc />
@@ -303,10 +303,6 @@ namespace PixelFit_SvendeAPI.Migrations
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
