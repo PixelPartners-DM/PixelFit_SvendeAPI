@@ -1,10 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PixelFit_SvendeAPI.Data;
 using PixelFit_SvendeAPI.Models;
-using PixelFit_SvendeAPI.Repositories;
 using PixelFit_SvendeAPI.Repositories.Interfaces;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace PixelFit_SvendeAPI.Repositories
 {
@@ -17,42 +14,59 @@ namespace PixelFit_SvendeAPI.Repositories
             _context = context;
         }
 
+        // Tilføjer en bruger direkte til databasen
         public async Task<User> AddAsync(User user)
         {
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
+
             return user;
         }
 
+        // Sletter en bruger ud fra id
         public async Task<bool> DeleteAsync(int id)
         {
-            var entity = await _context.Users.FindAsync(id);
-            if (entity == null) return false;
-            _context.Users.Remove(entity);
+            var user = await _context.Users.FindAsync(id);
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            _context.Users.Remove(user);
             await _context.SaveChangesAsync();
+
             return true;
         }
 
+        // Henter alle brugere
         public async Task<IEnumerable<User>> GetAllAsync()
         {
-            return await _context.Users.AsNoTracking().ToListAsync();
+            return await _context.Users
+                .AsNoTracking()
+                .ToListAsync();
         }
 
-        public async Task<User> GetByIdAsync(int id)
+        // Henter en bruger ud fra id
+        public async Task<User?> GetByIdAsync(int id)
         {
             return await _context.Users.FindAsync(id);
         }
 
+        // Opdaterer en bruger
         public async Task<User> UpdateAsync(User user)
         {
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
+
             return user;
         }
 
-        public async Task<User> FindByEmailAsync(string email)
+        // Finder en bruger ud fra email
+        public async Task<User?> FindByEmailAsync(string email)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            return await _context.Users
+                .FirstOrDefaultAsync(user => user.Email == email);
         }
     }
 }
