@@ -140,8 +140,8 @@ app.MapGet("/api/health", () => Results.Ok("Healthy"));
 // så API'et ser de korrekte proxy oplysninger
 app.UseForwardedHeaders();
 
-// Enable HTTPS redirection (redirects http -> https)
-app.UseHttpsRedirection();
+// Aktiver HTTPS redirection (Kun ved brug af kestrel, du bruger Nginx.)
+//app.UseHttpsRedirection();
 
 // Finder ud af hvem brugeren er ud fra JWT
 app.UseAuthentication();
