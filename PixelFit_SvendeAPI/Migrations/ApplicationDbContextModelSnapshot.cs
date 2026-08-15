@@ -163,6 +163,10 @@ namespace PixelFit_SvendeAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("MuscleGroupId")
                         .HasColumnType("int");
 
@@ -170,16 +174,11 @@ namespace PixelFit_SvendeAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TrainingDayId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("MuscleGroupId");
 
-                    b.HasIndex("TrainingDayId");
-
-                    b.ToTable("Exercise");
+                    b.ToTable("Exercises");
                 });
 
             modelBuilder.Entity("PixelFit_SvendeAPI.Models.ExerciseSet", b =>
@@ -190,13 +189,13 @@ namespace PixelFit_SvendeAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ExerciseId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Reps")
                         .HasColumnType("int");
 
                     b.Property<int>("RestBetweenSets")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TrainingDayExerciseId")
                         .HasColumnType("int");
 
                     b.Property<double>("Weight")
@@ -204,9 +203,9 @@ namespace PixelFit_SvendeAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ExerciseId");
+                    b.HasIndex("TrainingDayExerciseId");
 
-                    b.ToTable("ExerciseSet");
+                    b.ToTable("ExerciseSets");
                 });
 
             modelBuilder.Entity("PixelFit_SvendeAPI.Models.MuscleGroup", b =>
@@ -223,7 +222,7 @@ namespace PixelFit_SvendeAPI.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MuscleGroup");
+                    b.ToTable("MuscleGroups");
                 });
 
             modelBuilder.Entity("PixelFit_SvendeAPI.Models.TrainingDay", b =>
@@ -246,6 +245,35 @@ namespace PixelFit_SvendeAPI.Migrations
                     b.HasIndex("TrainingProgramId");
 
                     b.ToTable("TrainingDays");
+                });
+
+            modelBuilder.Entity("PixelFit_SvendeAPI.Models.TrainingDayExercise", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ExerciseId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RestBetweenExercises")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TrainingDayId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExerciseId");
+
+                    b.HasIndex("TrainingDayId");
+
+                    b.ToTable("TrainingDayExercises");
                 });
 
             modelBuilder.Entity("PixelFit_SvendeAPI.Models.TrainingProgram", b =>
@@ -400,26 +428,18 @@ namespace PixelFit_SvendeAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PixelFit_SvendeAPI.Models.TrainingDay", "TrainingDay")
-                        .WithMany("Exercises")
-                        .HasForeignKey("TrainingDayId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("MuscleGroup");
-
-                    b.Navigation("TrainingDay");
                 });
 
             modelBuilder.Entity("PixelFit_SvendeAPI.Models.ExerciseSet", b =>
                 {
-                    b.HasOne("PixelFit_SvendeAPI.Models.Exercise", "Exercise")
+                    b.HasOne("PixelFit_SvendeAPI.Models.TrainingDayExercise", "TrainingDayExercise")
                         .WithMany("Sets")
-                        .HasForeignKey("ExerciseId")
+                        .HasForeignKey("TrainingDayExerciseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Exercise");
+                    b.Navigation("TrainingDayExercise");
                 });
 
             modelBuilder.Entity("PixelFit_SvendeAPI.Models.TrainingDay", b =>
@@ -433,6 +453,25 @@ namespace PixelFit_SvendeAPI.Migrations
                     b.Navigation("Program");
                 });
 
+            modelBuilder.Entity("PixelFit_SvendeAPI.Models.TrainingDayExercise", b =>
+                {
+                    b.HasOne("PixelFit_SvendeAPI.Models.Exercise", "Exercise")
+                        .WithMany()
+                        .HasForeignKey("ExerciseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PixelFit_SvendeAPI.Models.TrainingDay", "TrainingDay")
+                        .WithMany("Exercises")
+                        .HasForeignKey("TrainingDayId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Exercise");
+
+                    b.Navigation("TrainingDay");
+                });
+
             modelBuilder.Entity("PixelFit_SvendeAPI.Models.TrainingProgram", b =>
                 {
                     b.HasOne("PixelFit_SvendeAPI.Models.User", "User")
@@ -444,11 +483,6 @@ namespace PixelFit_SvendeAPI.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("PixelFit_SvendeAPI.Models.Exercise", b =>
-                {
-                    b.Navigation("Sets");
-                });
-
             modelBuilder.Entity("PixelFit_SvendeAPI.Models.MuscleGroup", b =>
                 {
                     b.Navigation("Exercises");
@@ -457,6 +491,11 @@ namespace PixelFit_SvendeAPI.Migrations
             modelBuilder.Entity("PixelFit_SvendeAPI.Models.TrainingDay", b =>
                 {
                     b.Navigation("Exercises");
+                });
+
+            modelBuilder.Entity("PixelFit_SvendeAPI.Models.TrainingDayExercise", b =>
+                {
+                    b.Navigation("Sets");
                 });
 
             modelBuilder.Entity("PixelFit_SvendeAPI.Models.TrainingProgram", b =>

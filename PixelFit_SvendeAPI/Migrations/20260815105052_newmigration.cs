@@ -54,7 +54,7 @@ namespace PixelFit_SvendeAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MuscleGroup",
+                name: "MuscleGroups",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -63,7 +63,7 @@ namespace PixelFit_SvendeAPI.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MuscleGroup", x => x.Id);
+                    table.PrimaryKey("PK_MuscleGroups", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -193,6 +193,27 @@ namespace PixelFit_SvendeAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Exercises",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MuscleGroupId = table.Column<int>(type: "int", nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Exercises", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Exercises_MuscleGroups_MuscleGroupId",
+                        column: x => x.MuscleGroupId,
+                        principalTable: "MuscleGroups",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TrainingDays",
                 columns: table => new
                 {
@@ -213,26 +234,27 @@ namespace PixelFit_SvendeAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Exercise",
+                name: "TrainingDayExercises",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     TrainingDayId = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    MuscleGroupId = table.Column<int>(type: "int", nullable: false)
+                    ExerciseId = table.Column<int>(type: "int", nullable: false),
+                    RestBetweenExercises = table.Column<int>(type: "int", nullable: false),
+                    Order = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Exercise", x => x.Id);
+                    table.PrimaryKey("PK_TrainingDayExercises", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Exercise_MuscleGroup_MuscleGroupId",
-                        column: x => x.MuscleGroupId,
-                        principalTable: "MuscleGroup",
+                        name: "FK_TrainingDayExercises_Exercises_ExerciseId",
+                        column: x => x.ExerciseId,
+                        principalTable: "Exercises",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Exercise_TrainingDays_TrainingDayId",
+                        name: "FK_TrainingDayExercises_TrainingDays_TrainingDayId",
                         column: x => x.TrainingDayId,
                         principalTable: "TrainingDays",
                         principalColumn: "Id",
@@ -240,23 +262,23 @@ namespace PixelFit_SvendeAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ExerciseSet",
+                name: "ExerciseSets",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ExerciseId = table.Column<int>(type: "int", nullable: false),
+                    TrainingDayExerciseId = table.Column<int>(type: "int", nullable: false),
                     Reps = table.Column<int>(type: "int", nullable: false),
                     Weight = table.Column<double>(type: "float", nullable: false),
                     RestBetweenSets = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ExerciseSet", x => x.Id);
+                    table.PrimaryKey("PK_ExerciseSets", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ExerciseSet_Exercise_ExerciseId",
-                        column: x => x.ExerciseId,
-                        principalTable: "Exercise",
+                        name: "FK_ExerciseSets_TrainingDayExercises_TrainingDayExerciseId",
+                        column: x => x.TrainingDayExerciseId,
+                        principalTable: "TrainingDayExercises",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -301,19 +323,24 @@ namespace PixelFit_SvendeAPI.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Exercise_MuscleGroupId",
-                table: "Exercise",
+                name: "IX_Exercises_MuscleGroupId",
+                table: "Exercises",
                 column: "MuscleGroupId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Exercise_TrainingDayId",
-                table: "Exercise",
-                column: "TrainingDayId");
+                name: "IX_ExerciseSets_TrainingDayExerciseId",
+                table: "ExerciseSets",
+                column: "TrainingDayExerciseId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ExerciseSet_ExerciseId",
-                table: "ExerciseSet",
+                name: "IX_TrainingDayExercises_ExerciseId",
+                table: "TrainingDayExercises",
                 column: "ExerciseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TrainingDayExercises_TrainingDayId",
+                table: "TrainingDayExercises",
+                column: "TrainingDayId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TrainingDays_TrainingProgramId",
@@ -345,19 +372,22 @@ namespace PixelFit_SvendeAPI.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "ExerciseSet");
+                name: "ExerciseSets");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "Exercise");
+                name: "TrainingDayExercises");
 
             migrationBuilder.DropTable(
-                name: "MuscleGroup");
+                name: "Exercises");
 
             migrationBuilder.DropTable(
                 name: "TrainingDays");
+
+            migrationBuilder.DropTable(
+                name: "MuscleGroups");
 
             migrationBuilder.DropTable(
                 name: "TrainingPrograms");
