@@ -17,8 +17,6 @@ using PixelFit_SvendeAPI.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-
 // Tilføjer Controllers til REST API'et
 builder.Services.AddControllers();
 
@@ -26,15 +24,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
-
 // Forbinder API'et til SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")
     )
 );
-
 
 
 // Identity bruges til brugerhåndtering og password hashing
@@ -102,15 +97,11 @@ builder.Services
             };
     });
 
-
-
 // Repository til brugerdata
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 // Service til brugerhåndtering
 builder.Services.AddScoped<IUserService, UserService>();
-
-
 
 // Repository til træningsprogrammer
 builder.Services.AddScoped<
@@ -122,13 +113,8 @@ builder.Services.AddScoped<
     ITrainingProgramService,
     TrainingProgramService>();
 
-
-
 // Service som laver JWT tokens ved login
 builder.Services.AddScoped<JwtService>();
-
-
-
 
 // Bruges fordi API'et kører bag en reverse proxy på serveren
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
@@ -141,30 +127,21 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownProxies.Clear();
 });
 
-
 var app = builder.Build();
-
-
 
 // Swagger er tilgængeligt så API'et kan testes i browseren
 app.UseSwagger();
 app.UseSwaggerUI();
 
-
-
-
 // Bruges til at kontrollere om API'et kører
 app.MapGet("/health", () => Results.Ok("Healthy"));
-
 
 // Skal ligge før authentication,
 // så API'et ser de korrekte proxy oplysninger
 app.UseForwardedHeaders();
 
-
-// HTTPS aktiveres når serveren er sat op til det
-// app.UseHttpsRedirection();
-
+// Enable HTTPS redirection (redirects http -> https)
+app.UseHttpsRedirection();
 
 // Finder ud af hvem brugeren er ud fra JWT
 app.UseAuthentication();
@@ -172,10 +149,8 @@ app.UseAuthentication();
 // Kontrollerer hvad brugeren har adgang til
 app.UseAuthorization();
 
-
 // Aktiverer alle Controllers
 app.MapControllers();
-
 
 // Starter API'et
 app.Run();
