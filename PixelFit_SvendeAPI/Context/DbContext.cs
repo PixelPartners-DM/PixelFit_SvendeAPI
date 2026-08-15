@@ -5,15 +5,31 @@ using PixelFit_SvendeAPI.Models;
 
 namespace PixelFit_SvendeAPI.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<int>, int>
+    public class ApplicationDbContext
+        : IdentityDbContext<User, IdentityRole<int>, int>
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        public ApplicationDbContext(
+            DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
         }
 
-        // Add other DbSet<T> here if you want to query them via DbContext directly
+        // Træningsprogrammer
         public DbSet<TrainingProgram> TrainingPrograms { get; set; }
+
+        // Træningsdage
         public DbSet<TrainingDay> TrainingDays { get; set; }
+
+        // Muskelgrupper
+        public DbSet<MuscleGroup> MuscleGroups { get; set; }
+
+        // Øvelsesbibliotek
+        public DbSet<Exercise> Exercises { get; set; }
+
+        // Øvelser som brugeren har valgt til en træningsdag
+        public DbSet<TrainingDayExercise> TrainingDayExercises { get; set; }
+
+        // Sæt til de valgte øvelser
+        public DbSet<ExerciseSet> ExerciseSets { get; set; }
     }
 }
