@@ -134,7 +134,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 // Bruges til at kontrollere om API'et kører
-app.MapGet("/health", () => Results.Ok("Healthy"));
+app.MapGet("/api/health", () => Results.Ok("Healthy"));
 
 // Skal ligge før authentication,
 // så API'et ser de korrekte proxy oplysninger
