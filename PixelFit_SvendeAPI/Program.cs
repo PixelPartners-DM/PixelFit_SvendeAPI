@@ -5,7 +5,9 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+
 using System.Text;
+using System.Text.Json.Serialization;
 
 using PixelFit_SvendeAPI.Data;
 using PixelFit_SvendeAPI.Models;
@@ -21,7 +23,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 
-builder.Services.AddControllers();
+// Tilføjer Controllers til REST API'et
+// JsonStringEnumConverter gør at enums kan sendes som tekst.
+// Fx. "Mandag" i stedet for 0.
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter()
+        );
+    });
 
 
 
@@ -34,13 +46,19 @@ builder.Services.AddSwaggerGen(options =>
         new OpenApiSecurityScheme
         {
             Name = "Authorization",
+
             Type = SecuritySchemeType.Http,
+
             Scheme = "bearer",
+
             BearerFormat = "JWT",
+
             In = ParameterLocation.Header,
+
             Description = "Indsæt dit JWT-token her."
         }
     );
+
 
     options.AddSecurityRequirement(
         new OpenApiSecurityRequirement
@@ -72,16 +90,19 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 );
 
 
-
 builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 {
     // Email skal være unik
     options.User.RequireUniqueEmail = true;
 
+
     // Password regler
     options.Password.RequiredLength = 6;
+
     options.Password.RequireDigit = false;
+
     options.Password.RequireNonAlphanumeric = false;
+
     options.Password.RequireUppercase = false;
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -104,15 +125,21 @@ builder.Services
             new TokenValidationParameters
             {
                 ValidateIssuer = true,
+
                 ValidateAudience = true,
+
                 ValidateLifetime = true,
+
                 ValidateIssuerSigningKey = true,
+
 
                 ValidIssuer =
                     builder.Configuration["Jwt:Issuer"],
 
+
                 ValidAudience =
                     builder.Configuration["Jwt:Audience"],
+
 
                 IssuerSigningKey =
                     new SymmetricSecurityKey(
@@ -132,6 +159,7 @@ builder.Services.AddScoped<
 builder.Services.AddScoped<
     IUserService,
     UserService>();
+
 
 
 builder.Services.AddScoped<
@@ -172,8 +200,29 @@ builder.Services.AddScoped<
     IExerciseService,
     ExerciseService>();
 
+// Repository til øvelser valgt på en træningsdag
+builder.Services.AddScoped<
+    ITrainingDayExerciseRepository,
+    TrainingDayExerciseRepository>();
+
+// Service til øvelser valgt på en træningsdag
+builder.Services.AddScoped<
+    ITrainingDayExerciseService,
+    TrainingDayExerciseService>();
+
+// Repository til sæt
+builder.Services.AddScoped<
+    IExerciseSetRepository,
+    ExerciseSetRepository>();
+
+// Service til sæt
+builder.Services.AddScoped<
+    IExerciseSetService,
+    ExerciseSetService>();
+
 
 builder.Services.AddScoped<JwtService>();
+
 
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
@@ -183,66 +232,116 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
         ForwardedHeaders.XForwardedProto;
 
     options.KnownNetworks.Clear();
+
     options.KnownProxies.Clear();
 });
 
 
 var app = builder.Build();
 
-// Ensure DB is migrated and seed initial data with a safe retry (executes on app start)
+
+// Sørger for at databasen bliver migreret
+// og faste data bliver seedet når API'et starter.
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    var logger = services.GetRequiredService<ILogger<Program>>();
-    var context = services.GetRequiredService<ApplicationDbContext>();
+
+
+    var logger =
+        services.GetRequiredService<
+            ILogger<Program>>();
+
+
+    var context =
+        services.GetRequiredService<
+            ApplicationDbContext>();
+
 
     const int maxAttempts = 5;
+
     var attempt = 0;
-    var delay = TimeSpan.FromSeconds(2);
+
+    var delay =
+        TimeSpan.FromSeconds(2);
+
 
     while (true)
     {
         try
         {
             attempt++;
-            // Apply EF Core migrations (equivalent to Update-Database)
+
+
+            // Kører EF Core migrations
             await context.Database.MigrateAsync();
 
-            // Run the seeder (idempotent: checks for existing MuscleGroups)
+
+            // Seeder faste data som
+            // muskelgrupper og øvelser
             await DbSeeder.SeedAsync(context);
 
-            logger.LogInformation("Database migration and seeding completed successfully.");
+
+            logger.LogInformation(
+                "Database migration and seeding completed successfully."
+            );
+
+
             break;
         }
-        catch (SqlException ex) when (attempt < maxAttempts)
+        catch (SqlException ex)
+            when (attempt < maxAttempts)
         {
-            logger.LogWarning(ex, "Database migration attempt {Attempt} failed — retrying in {Seconds}s", attempt, delay.TotalSeconds);
+            logger.LogWarning(
+                ex,
+                "Database migration attempt {Attempt} failed — retrying in {Seconds}s",
+                attempt,
+                delay.TotalSeconds
+            );
+
+
             await Task.Delay(delay);
+
+
             delay = delay * 2;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while migrating or seeding the database.");
+            logger.LogError(
+                ex,
+                "An error occurred while migrating or seeding the database."
+            );
+
+
             throw;
         }
     }
 }
 
 
+
 app.UseSwagger();
 
 app.UseSwaggerUI(options =>
 {
+    // Beholder JWT login i Swagger
     options.EnablePersistAuthorization();
 });
 
 
-app.MapGet("/api/health",() => Results.Text("Healthy\n"));
+
+app.MapGet(
+    "/api/health",
+    () => Results.Text("Healthy\n")
+);
+
+
 
 app.UseForwardedHeaders();
 
-// HTTPS håndteres af Nginx, så vi behøver ikke at bruge HTTPS redirection i vores API
+
+// HTTPS håndteres af Nginx
 // app.UseHttpsRedirection();
+
 
 app.UseAuthentication();
 
@@ -250,4 +349,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+
+// Starter API'et
 app.Run();

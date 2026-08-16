@@ -8,89 +8,120 @@ namespace PixelFit_SvendeAPI.Data
         public static async Task SeedAsync(
             ApplicationDbContext context)
         {
-            // Hvis der allerede findes muskelgrupper,
-            // opretter vi dem ikke igen
-            if (await context.MuscleGroups.AnyAsync())
+           
+
+            // Opretter kun muskelgrupper hvis der ikke
+            // allerede findes nogen i databasen
+            if (!await context.MuscleGroups.AnyAsync())
             {
-                return;
+                var muscleGroups = new List<MuscleGroup>
+                {
+                    new MuscleGroup
+                    {
+                        Name = "Bryst"
+                    },
+
+                    new MuscleGroup
+                    {
+                        Name = "Ryg"
+                    },
+
+                    new MuscleGroup
+                    {
+                        Name = "Skuldre"
+                    },
+
+                    new MuscleGroup
+                    {
+                        Name = "Biceps"
+                    },
+
+                    new MuscleGroup
+                    {
+                        Name = "Triceps"
+                    },
+
+                    new MuscleGroup
+                    {
+                        Name = "Ben"
+                    },
+
+                    new MuscleGroup
+                    {
+                        Name = "Mave"
+                    },
+
+                    new MuscleGroup
+                    {
+                        Name = "Underarme"
+                    },
+
+                    new MuscleGroup
+                    {
+                        Name = "Nakke"
+                    },
+
+                    new MuscleGroup
+                    {
+                        Name = "Lægge"
+                    },
+
+                    new MuscleGroup
+                    {
+                        Name = "Balder"
+                    }
+                };
+
+
+                await context.MuscleGroups.AddRangeAsync(
+                    muscleGroups
+                );
+
+                await context.SaveChangesAsync();
             }
 
 
+            // Henter Bryst fra databasen.
+            // Nu har den også et rigtigt database-id.
+            var chest =
+                await context.MuscleGroups
+                    .FirstAsync(
+                        muscleGroup =>
+                            muscleGroup.Name == "Bryst"
+                    );
 
-            var chest = new MuscleGroup
+
+
+            // Tjekker om Bench Press allerede findes,
+            // så den ikke bliver oprettet flere gange
+            var benchPressExists =
+                await context.Exercises.AnyAsync(
+                    exercise =>
+                        exercise.Name == "Bench Press"
+                );
+
+
+            if (!benchPressExists)
             {
-                Name = "Bryst"
-            };
+                var benchPress = new Exercise
+                {
+                    Name = "Bench Press",
 
-            var back = new MuscleGroup
-            {
-                Name = "Ryg"
-            };
+                    // Kobler Bench Press til Bryst
+                    MuscleGroupId = chest.Id,
 
-            var shoulders = new MuscleGroup
-            {
-                Name = "Skuldre"
-            };
-
-            var biceps = new MuscleGroup
-            {
-                Name = "Biceps"
-            };
-
-            var triceps = new MuscleGroup
-            {
-                Name = "Triceps"
-            };
-
-            var legs = new MuscleGroup
-            {
-                Name = "Ben"
-            };
-
-            var abs = new MuscleGroup
-            {
-                Name = "Mave"
-            };
-
-            var forearms = new MuscleGroup
-            {
-                Name = "Underarme"
-            };
-
-            var neck = new MuscleGroup
-            {
-                Name = "Nakke"
-            };
-
-            var calves = new MuscleGroup
-            {
-                Name = "Lægge"
-            };
-
-            var glutes = new MuscleGroup
-            {
-                Name = "Balder"
-            };
+                    // Billedet ligger i MAUI-projektets wwwroot
+                    ImageUrl =
+                        "images/exercises/BenchPress.webp"
+                };
 
 
-            // Tilføjer alle muskelgrupperne til databasen
-            await context.MuscleGroups.AddRangeAsync(
-                chest,
-                back,
-                shoulders,
-                biceps,
-                triceps,
-                legs,
-                abs,
-                forearms,
-                neck,
-                calves,
-                glutes
-            );
+                await context.Exercises.AddAsync(
+                    benchPress
+                );
 
-
-            // Gemmer ændringerne i SQL Server
-            await context.SaveChangesAsync();
+                await context.SaveChangesAsync();
+            }
         }
     }
 }
