@@ -233,9 +233,8 @@ namespace PixelFit_SvendeAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("DayName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("DayName")
+                        .HasColumnType("int");
 
                     b.Property<int>("TrainingProgramId")
                         .HasColumnType("int");

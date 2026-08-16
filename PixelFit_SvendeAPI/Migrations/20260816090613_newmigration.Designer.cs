@@ -12,7 +12,7 @@ using PixelFit_SvendeAPI.Data;
 namespace PixelFit_SvendeAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260815105052_newmigration")]
+    [Migration("20260816090613_newmigration")]
     partial class newmigration
     {
         /// <inheritdoc />
@@ -236,9 +236,8 @@ namespace PixelFit_SvendeAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("DayName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("DayName")
+                        .HasColumnType("int");
 
                     b.Property<int>("TrainingProgramId")
                         .HasColumnType("int");
