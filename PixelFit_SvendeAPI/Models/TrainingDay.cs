@@ -9,8 +9,8 @@
 
         public TrainingProgram Program { get; set; } = null!;
 
-        // Fx. Mandag, Onsdag eller Fredag
-        public string DayName { get; set; } = string.Empty;
+        // Den valgte dag i ugen
+        public WeekDay DayName { get; set; }
 
         // De øvelser brugeren har valgt til denne træningsdag
         public List<TrainingDayExercise> Exercises { get; set; } = new();
