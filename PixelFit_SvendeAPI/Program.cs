@@ -1,10 +1,11 @@
-using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Text;
 
 using PixelFit_SvendeAPI.Data;
 using PixelFit_SvendeAPI.Models;
@@ -188,6 +189,45 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 
 var app = builder.Build();
 
+// Ensure DB is migrated and seed initial data with a safe retry (executes on app start)
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    var context = services.GetRequiredService<ApplicationDbContext>();
+
+    const int maxAttempts = 5;
+    var attempt = 0;
+    var delay = TimeSpan.FromSeconds(2);
+
+    while (true)
+    {
+        try
+        {
+            attempt++;
+            // Apply EF Core migrations (equivalent to Update-Database)
+            await context.Database.MigrateAsync();
+
+            // Run the seeder (idempotent: checks for existing MuscleGroups)
+            await DbSeeder.SeedAsync(context);
+
+            logger.LogInformation("Database migration and seeding completed successfully.");
+            break;
+        }
+        catch (SqlException ex) when (attempt < maxAttempts)
+        {
+            logger.LogWarning(ex, "Database migration attempt {Attempt} failed — retrying in {Seconds}s", attempt, delay.TotalSeconds);
+            await Task.Delay(delay);
+            delay = delay * 2;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "An error occurred while migrating or seeding the database.");
+            throw;
+        }
+    }
+}
+
 
 app.UseSwagger();
 
@@ -197,16 +237,11 @@ app.UseSwaggerUI(options =>
 });
 
 
-app.MapGet(
-    "/api/health",
-    () => Results.Text("Healthy\n")
-);
-
-
+app.MapGet("/api/health",() => Results.Text("Healthy\n"));
 
 app.UseForwardedHeaders();
 
-// HTTPS håndteres senere / via reverse proxy
+// HTTPS håndteres af Nginx, så vi behøver ikke at bruge HTTPS redirection i vores API
 // app.UseHttpsRedirection();
 
 app.UseAuthentication();

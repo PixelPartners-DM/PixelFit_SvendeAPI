@@ -12,7 +12,7 @@ using PixelFit_SvendeAPI.Data;
 namespace PixelFit_SvendeAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260816090613_newmigration")]
+    [Migration("20260816094934_newmigration")]
     partial class newmigration
     {
         /// <inheritdoc />
