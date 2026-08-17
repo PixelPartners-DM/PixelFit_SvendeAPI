@@ -33,10 +33,8 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Logging.ClearProviders();
-builder.Logging.AddSerilog();
+builder.Host.UseSerilog();
 
-Log.Information("Serilog is working!");
 
 
 // Tilføjer Controllers til REST API'et
@@ -254,6 +252,9 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 
 
 var app = builder.Build();
+
+// Logger at Serilog virker. Det er til at teste log på serveren.
+Log.Information("Serilog is working!");
 
 
 // Sørger for at databasen bliver migreret
