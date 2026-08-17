@@ -5,6 +5,8 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
+using Serilog.Sinks.SystemConsole;
 
 using System.Text;
 using System.Text.Json.Serialization;
@@ -19,8 +21,22 @@ using PixelFit_SvendeAPI.Services;
 using PixelFit_SvendeAPI.Services.Interfaces;
 
 
-var builder = WebApplication.CreateBuilder(args);
 
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .WriteTo.File(
+        "/var/log/pixelfit/api.log",
+        rollingInterval: RollingInterval.Day,
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+    )
+    .CreateLogger();
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog();
+
+Log.Information("Serilog is working!");
 
 
 // Tilføjer Controllers til REST API'et
