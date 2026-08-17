@@ -41,11 +41,14 @@ builder.Host.UseSerilog();
 // JsonStringEnumConverter gør at enums kan sendes som tekst.
 // Fx. "Mandag" i stedet for 0.
 builder.Services
-    .AddControllers()
+    .AddControllers(options =>
+    {
+        options.Filters.Add<PixelFit_SvendeAPI.Filters.AuthLoggingFilter>();
+    })
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(
-            new JsonStringEnumConverter()
+            new System.Text.Json.Serialization.JsonStringEnumConverter()
         );
     });
 
@@ -237,6 +240,9 @@ builder.Services.AddScoped<
 
 builder.Services.AddScoped<JwtService>();
 
+
+// Register filter
+builder.Services.AddScoped<PixelFit_SvendeAPI.Filters.AuthLoggingFilter>();
 
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
