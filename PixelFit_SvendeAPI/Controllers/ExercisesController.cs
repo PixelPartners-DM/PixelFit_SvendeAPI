@@ -8,10 +8,8 @@ namespace PixelFit_SvendeAPI.Controllers
     // Alle endpoints kræver login med JWT
     [Authorize]
 
-    // Fortæller ASP.NET Core at dette er en API-controller
     [ApiController]
 
-    // Endpoint starter med api/Exercises
     [Route("api/[controller]")]
     public class ExercisesController : ControllerBase
     {
@@ -26,11 +24,7 @@ namespace PixelFit_SvendeAPI.Controllers
         }
 
 
-        // =====================================================
-        // GET ALLE ØVELSER
-        // =====================================================
 
-        // GET: api/Exercises
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -62,11 +56,7 @@ namespace PixelFit_SvendeAPI.Controllers
         }
 
 
-        // =====================================================
-        // GET ÉN ØVELSE
-        // =====================================================
 
-        // GET: api/Exercises/1
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -104,11 +94,7 @@ namespace PixelFit_SvendeAPI.Controllers
         }
 
 
-        // =====================================================
-        // GET ØVELSER EFTER MUSKELGRUPPE
-        // =====================================================
 
-        // GET: api/Exercises/muscle-group/1
         [HttpGet("muscle-group/{muscleGroupId}")]
         public async Task<IActionResult> GetByMuscleGroup(
             int muscleGroupId)
