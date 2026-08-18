@@ -7,7 +7,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Sinks.SystemConsole;
-using Serilog.AspNetCore; // Add this using directive for UseSerilogRequestLogging
+using Serilog.AspNetCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 using System.Text;
 using System.Text.Json.Serialization;
@@ -21,8 +22,6 @@ using PixelFit_SvendeAPI.Repositories.Interfaces;
 using PixelFit_SvendeAPI.Services;
 using PixelFit_SvendeAPI.Services.Interfaces;
 
-
-
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .WriteTo.Console()
@@ -32,14 +31,17 @@ Log.Logger = new LoggerConfiguration()
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Register Serilog host integration (this also registers DiagnosticContext)
+// Use Serilog host integration (this registers DiagnosticContext and other services)
 builder.Host.UseSerilog((hostingContext, services, loggerConfig) =>
     loggerConfig
         .ReadFrom.Configuration(hostingContext.Configuration)
         .ReadFrom.Services(services)
         .Enrich.FromLogContext());
-Log.Information("Serilog is working!");
 
+// Ensure DiagnosticContext is available as a fallback (safe: TryAdd won't override a real registration)
+builder.Services.TryAddSingleton<Serilog.Extensions.Hosting.DiagnosticContext>();
+
+Log.Information("Serilog is working!");
 
 // Tilføjer Controllers til REST API'et
 // JsonStringEnumConverter gør at enums kan sendes som tekst.
@@ -52,8 +54,6 @@ builder.Services
             new JsonStringEnumConverter()
         );
     });
-
-
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -77,7 +77,6 @@ builder.Services.AddSwaggerGen(options =>
         }
     );
 
-
     options.AddSecurityRequirement(
         new OpenApiSecurityRequirement
         {
@@ -97,8 +96,6 @@ builder.Services.AddSwaggerGen(options =>
     );
 });
 
-
-
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString(
@@ -107,12 +104,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     )
 );
 
-
 builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 {
     // Email skal være unik
     options.User.RequireUniqueEmail = true;
-
 
     // Password regler
     options.Password.RequiredLength = 6;
@@ -125,8 +120,6 @@ builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
-
-
 
 builder.Services
     .AddAuthentication(options =>
@@ -150,14 +143,11 @@ builder.Services
 
                 ValidateIssuerSigningKey = true,
 
-
                 ValidIssuer =
                     builder.Configuration["Jwt:Issuer"],
 
-
                 ValidAudience =
                     builder.Configuration["Jwt:Audience"],
-
 
                 IssuerSigningKey =
                     new SymmetricSecurityKey(
@@ -168,8 +158,6 @@ builder.Services
             };
     });
 
-
-
 builder.Services.AddScoped<
     IUserRepository,
     UserRepository>();
@@ -177,8 +165,6 @@ builder.Services.AddScoped<
 builder.Services.AddScoped<
     IUserService,
     UserService>();
-
-
 
 builder.Services.AddScoped<
     ITrainingProgramRepository,
@@ -188,7 +174,6 @@ builder.Services.AddScoped<
     ITrainingProgramService,
     TrainingProgramService>();
 
-
 builder.Services.AddScoped<
     ITrainingDayRepository,
     TrainingDayRepository>();
@@ -197,8 +182,6 @@ builder.Services.AddScoped<
     ITrainingDayService,
     TrainingDayService>();
 
-
-
 builder.Services.AddScoped<
     IMuscleGroupRepository,
     MuscleGroupRepository>();
@@ -206,7 +189,6 @@ builder.Services.AddScoped<
 builder.Services.AddScoped<
     IMuscleGroupService,
     MuscleGroupService>();
-
 
 // Repository til øvelser
 builder.Services.AddScoped<
@@ -238,11 +220,7 @@ builder.Services.AddScoped<
     IExerciseSetService,
     ExerciseSetService>();
 
-
 builder.Services.AddScoped<JwtService>();
-
-
-
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
@@ -255,9 +233,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownProxies.Clear();
 });
 
-
 var app = builder.Build();
-
 
 // Sørger for at databasen bliver migreret
 // og faste data bliver seedet når API'et starter.
@@ -265,16 +241,13 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
 
-
     var logger =
         services.GetRequiredService<
             ILogger<Program>>();
 
-
     var context =
         services.GetRequiredService<
             ApplicationDbContext>();
-
 
     const int maxAttempts = 5;
 
@@ -283,27 +256,22 @@ using (var scope = app.Services.CreateScope())
     var delay =
         TimeSpan.FromSeconds(2);
 
-
     while (true)
     {
         try
         {
             attempt++;
 
-
             // Kører EF Core migrations
             await context.Database.MigrateAsync();
-
 
             // Seeder faste data som
             // muskelgrupper og øvelser
             await DbSeeder.SeedAsync(context);
 
-
             logger.LogInformation(
                 "Database migration and seeding completed successfully."
             );
-
 
             break;
         }
@@ -317,9 +285,7 @@ using (var scope = app.Services.CreateScope())
                 delay.TotalSeconds
             );
 
-
             await Task.Delay(delay);
-
 
             delay = delay * 2;
         }
@@ -330,13 +296,10 @@ using (var scope = app.Services.CreateScope())
                 "An error occurred while migrating or seeding the database."
             );
 
-
             throw;
         }
     }
 }
-
-
 
 app.UseSwagger();
 
@@ -346,21 +309,15 @@ app.UseSwaggerUI(options =>
     options.EnablePersistAuthorization();
 });
 
-
-
 app.MapGet(
     "/api/health",
     () => Results.Text("Healthy\n")
 );
 
-
-
 app.UseForwardedHeaders();
-
 
 // HTTPS håndteres af Nginx
 // app.UseHttpsRedirection();
-
 
 app.UseSerilogRequestLogging(options =>
 {
@@ -368,16 +325,15 @@ app.UseSerilogRequestLogging(options =>
     {
         diagnosticContext.Set("RemoteIpAddress", httpContext.Connection.RemoteIpAddress?.ToString());
         diagnosticContext.Set("UserName", httpContext.User?.Identity?.Name ?? "anonymous");
-        // if you store user id in a claim:
         diagnosticContext.Set("UserId", httpContext.User?.FindFirst("sub")?.Value ?? httpContext.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);
     };
 });
+
 app.UseAuthentication();
 
 app.UseAuthorization();
 
 app.MapControllers();
-
 
 // Starter API'et
 app.Run();
