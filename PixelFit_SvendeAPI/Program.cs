@@ -26,17 +26,18 @@ using PixelFit_SvendeAPI.Services.Interfaces;
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .WriteTo.Console()
-    .WriteTo.File(
-        "/var/log/pixelfit/api.log",
-        rollingInterval: RollingInterval.Day,
-        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
-    )
+    .WriteTo.File("/var/log/pixelfit/api.log", rollingInterval: RollingInterval.Day)
+    .Enrich.FromLogContext()
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Logging.ClearProviders();
-builder.Logging.AddSerilog();
 
+// Register Serilog host integration (this also registers DiagnosticContext)
+builder.Host.UseSerilog((hostingContext, services, loggerConfig) =>
+    loggerConfig
+        .ReadFrom.Configuration(hostingContext.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext());
 Log.Information("Serilog is working!");
 
 
@@ -361,7 +362,16 @@ app.UseForwardedHeaders();
 // app.UseHttpsRedirection();
 
 
-app.UseSerilogRequestLogging();
+app.UseSerilogRequestLogging(options =>
+{
+    options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+    {
+        diagnosticContext.Set("RemoteIpAddress", httpContext.Connection.RemoteIpAddress?.ToString());
+        diagnosticContext.Set("UserName", httpContext.User?.Identity?.Name ?? "anonymous");
+        // if you store user id in a claim:
+        diagnosticContext.Set("UserId", httpContext.User?.FindFirst("sub")?.Value ?? httpContext.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);
+    };
+});
 app.UseAuthentication();
 
 app.UseAuthorization();
