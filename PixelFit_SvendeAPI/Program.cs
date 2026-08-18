@@ -22,26 +22,39 @@ using PixelFit_SvendeAPI.Repositories.Interfaces;
 using PixelFit_SvendeAPI.Services;
 using PixelFit_SvendeAPI.Services.Interfaces;
 
-// Configure static logger (file + console)
+// configure the static logger (file + console) with a 20 MB file-size limit and daily rollover
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
-    .WriteTo.Console()
-    .WriteTo.File("/var/log/pixelfit/api.log", rollingInterval: RollingInterval.Day)
     .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File(
+        "/var/log/pixelfit/api.log",
+        rollingInterval: RollingInterval.Day,
+        fileSizeLimitBytes: 20 * 1024 * 1024, // 20 MB
+        rollOnFileSizeLimit: true,
+        retainedFileCountLimit: 14, // keep up to 14 files (adjust retention as needed)
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+    )
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Ensure Host Serilog writes to the same file sink and reads DI
+// ensure Microsoft ILogger routes to Serilog
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(Log.Logger, dispose: false);
+
+// Host integration (must run before builder.Build())
 builder.Host.UseSerilog((hostingContext, services, loggerConfig) =>
     loggerConfig
-        .MinimumLevel.Information()
         .ReadFrom.Configuration(hostingContext.Configuration)
         .ReadFrom.Services(services)
         .Enrich.FromLogContext()
         .WriteTo.File(
             "/var/log/pixelfit/api.log",
             rollingInterval: RollingInterval.Day,
+            fileSizeLimitBytes: 20 * 1024 * 1024, // 20 MB
+            rollOnFileSizeLimit: true,
+            retainedFileCountLimit: 14,
             outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
         ));
 
