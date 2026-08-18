@@ -318,5 +318,38 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// temporary request/response tracing middleware (do NOT log passwords)
+app.Use(async (context, next) =>
+{
+    var remoteIp = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+    Log.Information("Incoming {Method} {Path} from {RemoteIp}", context.Request.Method, context.Request.Path, remoteIp);
+
+    // If this is the login endpoint, capture the email only (do not log password)
+    if (context.Request.Path.Equals("/api/auth/login", System.StringComparison.OrdinalIgnoreCase)
+        && context.Request.Method == "POST")
+    {
+        context.Request.EnableBuffering();
+
+        using var reader = new System.IO.StreamReader(context.Request.Body, leaveOpen: true);
+        var body = await reader.ReadToEndAsync();
+        context.Request.Body.Position = 0;
+
+        try
+        {
+            using var doc = System.Text.Json.JsonDocument.Parse(body);
+            var email = doc.RootElement.TryGetProperty("email", out var e) ? e.GetString() ?? "<null>" : "<missing>";
+            Log.Information("Login request received for email {Email} from {RemoteIp}", email, remoteIp);
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            Log.Warning("Login request had invalid JSON from {RemoteIp}", remoteIp);
+        }
+    }
+
+    await next();
+
+    Log.Information("Outgoing {Method} {Path} => {StatusCode} to {RemoteIp}", context.Request.Method, context.Request.Path, context.Response.StatusCode, remoteIp);
+});
+
 // Starter API'et
 app.Run();
