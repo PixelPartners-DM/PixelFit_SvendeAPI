@@ -230,6 +230,18 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 
 var app = builder.Build();
 
+// Ensure Host Serilog writes to the same file sink and reads DI
+builder.Host.UseSerilog((hostingContext, services, loggerConfig) =>
+    loggerConfig
+        .MinimumLevel.Information()
+        .ReadFrom.Configuration(hostingContext.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext()
+        .WriteTo.File(
+            "/var/log/pixelfit/api.log",
+            rollingInterval: RollingInterval.Day,
+            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+        ));
 
 // Sørger for at databasen bliver migreret
 // og faste data bliver seedet når API'et starter.
