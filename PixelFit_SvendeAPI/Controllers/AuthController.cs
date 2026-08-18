@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PixelFit_SvendeAPI.DTOS;
@@ -32,6 +33,7 @@ namespace PixelFit_SvendeAPI.Controllers
 
         // POST: api/auth/login
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
             var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";

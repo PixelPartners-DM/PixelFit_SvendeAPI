@@ -316,6 +316,18 @@ app.MapGet(
 
 app.UseForwardedHeaders();
 
+app.Use(async (context, next) =>
+{
+    Log.Information(
+        "Incoming request {Method} {Path} from {RemoteIp}",
+        context.Request.Method,
+        context.Request.Path,
+        context.Connection.RemoteIpAddress?.ToString() ?? "unknown"
+    );
+
+    await next();
+});
+
 // HTTPS håndteres af Nginx
 // app.UseHttpsRedirection();
 
