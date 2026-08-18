@@ -240,8 +240,6 @@ builder.Services.AddScoped<
 builder.Services.AddScoped<JwtService>();
 
 
-// Register filter
-builder.Services.AddScoped<PixelFit_SvendeAPI.Filters.AuthLoggingFilter>();
 
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
