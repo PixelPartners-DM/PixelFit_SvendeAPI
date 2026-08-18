@@ -9,6 +9,7 @@ using Serilog;
 using Serilog.Sinks.SystemConsole;
 using Serilog.AspNetCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -21,27 +22,20 @@ using PixelFit_SvendeAPI.Repositories.Interfaces;
 using PixelFit_SvendeAPI.Services;
 using PixelFit_SvendeAPI.Services.Interfaces;
 
-// configure the static logger (file + console)
+// Configure static logger (file + console)
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
-    .Enrich.FromLogContext()
     .WriteTo.Console()
-    .WriteTo.File(
-        "/var/log/pixelfit/api.log",
-        rollingInterval: RollingInterval.Day,
-        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
-    )
+    .WriteTo.File("/var/log/pixelfit/api.log", rollingInterval: RollingInterval.Day)
+    .Enrich.FromLogContext()
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// make Microsoft.Extensions.Logging use Serilog (routes ILogger<T> to Serilog)
-builder.Logging.ClearProviders();
-builder.Logging.AddSerilog(Log.Logger, dispose: false);
-
-// ensure Host Serilog integration (reads config/services and registers DiagnosticContext)
+// Ensure Host Serilog writes to the same file sink and reads DI
 builder.Host.UseSerilog((hostingContext, services, loggerConfig) =>
     loggerConfig
+        .MinimumLevel.Information()
         .ReadFrom.Configuration(hostingContext.Configuration)
         .ReadFrom.Services(services)
         .Enrich.FromLogContext()
@@ -332,39 +326,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-// temporary request/response tracing middleware (do NOT log passwords)
-app.Use(async (context, next) =>
-{
-    var remoteIp = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-    Log.Information("Incoming {Method} {Path} from {RemoteIp}", context.Request.Method, context.Request.Path, remoteIp);
-
-    // If this is the login endpoint, capture the email only (do not log password)
-    if (context.Request.Path.Equals("/api/auth/login", System.StringComparison.OrdinalIgnoreCase)
-        && context.Request.Method == "POST")
-    {
-        context.Request.EnableBuffering();
-
-        using var reader = new System.IO.StreamReader(context.Request.Body, leaveOpen: true);
-        var body = await reader.ReadToEndAsync();
-        context.Request.Body.Position = 0;
-
-        try
-        {
-            using var doc = System.Text.Json.JsonDocument.Parse(body);
-            var email = doc.RootElement.TryGetProperty("email", out var e) ? e.GetString() ?? "<null>" : "<missing>";
-            Log.Information("Login request received for email {Email} from {RemoteIp}", email, remoteIp);
-        }
-        catch (System.Text.Json.JsonException)
-        {
-            Log.Warning("Login request had invalid JSON from {RemoteIp}", remoteIp);
-        }
-    }
-
-    await next();
-
-    Log.Information("Outgoing {Method} {Path} => {StatusCode} to {RemoteIp}", context.Request.Method, context.Request.Path, context.Response.StatusCode, remoteIp);
-});
 
 // Starter API'et
 app.Run();
