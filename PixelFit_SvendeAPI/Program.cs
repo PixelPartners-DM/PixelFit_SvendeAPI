@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Sinks.SystemConsole;
+using Serilog.AspNetCore; // Add this using directive for UseSerilogRequestLogging
 
 using System.Text;
 using System.Text.Json.Serialization;
@@ -360,6 +361,7 @@ app.UseForwardedHeaders();
 // app.UseHttpsRedirection();
 
 
+app.UseSerilogRequestLogging();
 app.UseAuthentication();
 
 app.UseAuthorization();
