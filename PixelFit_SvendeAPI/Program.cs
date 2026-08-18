@@ -31,7 +31,7 @@ Log.Logger = new LoggerConfiguration()
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Ensure Host Serilog writes to the same file sink and reads DI
+// Ensure Host Serilog writes to the same file sink and reads DI.
 builder.Host.UseSerilog((hostingContext, services, loggerConfig) =>
     loggerConfig
         .MinimumLevel.Information()
