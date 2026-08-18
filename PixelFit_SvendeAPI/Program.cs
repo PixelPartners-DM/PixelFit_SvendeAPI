@@ -35,6 +35,9 @@ builder.Logging.AddSerilog();
 
 Log.Information("Serilog is working!");
 
+// register Serilog logger into DI so Serilog.ILogger can be injected
+builder.Services.AddSingleton<Serilog.ILogger>(Log.Logger);
+
 // Tilføjer Controllers til REST API'et
 // JsonStringEnumConverter gør at enums kan sendes som tekst.
 // Fx. "Mandag" i stedet for 0.

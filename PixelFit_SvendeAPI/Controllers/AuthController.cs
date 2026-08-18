@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using PixelFit_SvendeAPI.DTOS;
 using PixelFit_SvendeAPI.Models;
 using PixelFit_SvendeAPI.Services;
-using Serilog;
 
 namespace PixelFit_SvendeAPI.Controllers
 {
@@ -17,19 +17,18 @@ namespace PixelFit_SvendeAPI.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly JwtService _jwtService;
-        private readonly Serilog.ILogger _logger;
+        private readonly ILogger<AuthController> _logger;
 
         // Dependency Injection giver controlleren adgang til
         // brugerhåndtering, JWT-service og Serilog logger
         public AuthController(
             UserManager<User> userManager,
             JwtService jwtService,
-            Serilog.ILogger logger)
+            ILogger<AuthController> logger)
         {
             _userManager = userManager;
             _jwtService = jwtService;
-            // Ensure a context-specific logger (adds class name)
-            _logger = logger.ForContext<AuthController>();
+            _logger = logger;
         }
 
         // POST: api/auth/login
@@ -39,7 +38,7 @@ namespace PixelFit_SvendeAPI.Controllers
         {
             var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
-            _logger.Information("Login attempt for {Email} from {IP}", dto?.Email ?? "null", ip);
+            _logger.LogInformation("Login attempt for {Email} from {IP}", dto?.Email ?? "null", ip);
 
             // Finder brugeren ud fra email
             var user = await _userManager.FindByEmailAsync(dto.Email);
@@ -47,7 +46,7 @@ namespace PixelFit_SvendeAPI.Controllers
             // Hvis brugeren ikke findes
             if (user == null)
             {
-                _logger.Warning("Failed login: unknown email {Email} from {IP}", dto.Email, ip);
+                _logger.LogWarning("Failed login: unknown email {Email} from {IP}", dto.Email, ip);
                 return Unauthorized(new
                 {
                     message = "Forkert email eller adgangskode."
@@ -64,7 +63,7 @@ namespace PixelFit_SvendeAPI.Controllers
             // Hvis adgangskoden er forkert
             if (!passwordCorrect)
             {
-                _logger.Warning("Failed login: invalid password for user id {UserId} ({Email}) from {IP}", user.Id, dto.Email, ip);
+                _logger.LogWarning("Failed login: invalid password for user id {UserId} ({Email}) from {IP}", user.Id, dto.Email, ip);
                 return Unauthorized(new
                 {
                     message = "Forkert email eller adgangskode."
@@ -74,7 +73,7 @@ namespace PixelFit_SvendeAPI.Controllers
             // Opretter JWT-token til brugeren
             var token = _jwtService.CreateToken(user);
 
-            _logger.Information("Successful login for user id {UserId} ({Email}) from {IP}", user.Id, user.Email, ip);
+            _logger.LogInformation("Successful login for user id {UserId} ({Email}) from {IP}", user.Id, user.Email, ip);
 
             // Sender token tilbage til MAUI-appen
             return Ok(new
