@@ -30,13 +30,10 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog();
 
-// Use Serilog host integration (this registers DiagnosticContext and other services)
-builder.Host.UseSerilog((hostingContext, services, loggerConfig) =>
-    loggerConfig
-        .ReadFrom.Configuration(hostingContext.Configuration)
-        .ReadFrom.Services(services)
-        .Enrich.FromLogContext());
+Log.Information("Serilog is working!");
 
 // Ensure DiagnosticContext is available as a fallback (safe: TryAdd won't override a real registration)
 builder.Services.TryAddSingleton<Serilog.Extensions.Hosting.DiagnosticContext>();
@@ -234,6 +231,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 });
 
 var app = builder.Build();
+
 
 // Sørger for at databasen bliver migreret
 // og faste data bliver seedet når API'et starter.
