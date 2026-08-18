@@ -43,14 +43,11 @@ Log.Information("Serilog is working!");
 // JsonStringEnumConverter gør at enums kan sendes som tekst.
 // Fx. "Mandag" i stedet for 0.
 builder.Services
-    .AddControllers(options =>
-    {
-        options.Filters.Add<PixelFit_SvendeAPI.Filters.AuthLoggingFilter>();
-    })
+    .AddControllers(options =>{})
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(
-            new System.Text.Json.Serialization.JsonStringEnumConverter()
+            new JsonStringEnumConverter()
         );
     });
 
