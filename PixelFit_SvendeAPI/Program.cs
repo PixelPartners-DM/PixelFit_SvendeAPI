@@ -9,7 +9,6 @@ using Serilog;
 using Serilog.Sinks.SystemConsole;
 using Serilog.AspNetCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -22,19 +21,27 @@ using PixelFit_SvendeAPI.Repositories.Interfaces;
 using PixelFit_SvendeAPI.Services;
 using PixelFit_SvendeAPI.Services.Interfaces;
 
+// configure the static logger (file + console)
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
-    .WriteTo.Console()
-    .WriteTo.File("/var/log/pixelfit/api.log", rollingInterval: RollingInterval.Day)
     .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .WriteTo.File(
+        "/var/log/pixelfit/api.log",
+        rollingInterval: RollingInterval.Day,
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+    )
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Ensure Host Serilog writes to the same file sink and reads DI.
+// make Microsoft.Extensions.Logging use Serilog (routes ILogger<T> to Serilog)
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(Log.Logger, dispose: false);
+
+// ensure Host Serilog integration (reads config/services and registers DiagnosticContext)
 builder.Host.UseSerilog((hostingContext, services, loggerConfig) =>
     loggerConfig
-        .MinimumLevel.Information()
         .ReadFrom.Configuration(hostingContext.Configuration)
         .ReadFrom.Services(services)
         .Enrich.FromLogContext()
