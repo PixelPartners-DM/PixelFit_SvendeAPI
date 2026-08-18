@@ -17,16 +17,19 @@ namespace PixelFit_SvendeAPI.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly JwtService _jwtService;
-        private readonly Serilog.ILogger _logger = Log.ForContext<AuthController>();
+        private readonly Serilog.ILogger _logger;
 
         // Dependency Injection giver controlleren adgang til
-        // brugerhåndtering og JWT-service
+        // brugerhåndtering, JWT-service og Serilog logger
         public AuthController(
             UserManager<User> userManager,
-            JwtService jwtService)
+            JwtService jwtService,
+            Serilog.ILogger logger)
         {
             _userManager = userManager;
             _jwtService = jwtService;
+            // Ensure a context-specific logger (adds class name)
+            _logger = logger.ForContext<AuthController>();
         }
 
         // POST: api/auth/login
