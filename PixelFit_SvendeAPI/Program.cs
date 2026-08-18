@@ -35,11 +35,6 @@ builder.Logging.AddSerilog();
 
 Log.Information("Serilog is working!");
 
-// Ensure DiagnosticContext is available as a fallback (safe: TryAdd won't override a real registration)
-builder.Services.TryAddSingleton<Serilog.Extensions.Hosting.DiagnosticContext>();
-
-Log.Information("Serilog is working!");
-
 // Tilføjer Controllers til REST API'et
 // JsonStringEnumConverter gør at enums kan sendes som tekst.
 // Fx. "Mandag" i stedet for 0.
@@ -328,16 +323,6 @@ app.Use(async (context, next) =>
 
 // HTTPS håndteres af Nginx
 // app.UseHttpsRedirection();
-
-app.UseSerilogRequestLogging(options =>
-{
-    options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
-    {
-        diagnosticContext.Set("RemoteIpAddress", httpContext.Connection.RemoteIpAddress?.ToString());
-        diagnosticContext.Set("UserName", httpContext.User?.Identity?.Name ?? "anonymous");
-        diagnosticContext.Set("UserId", httpContext.User?.FindFirst("sub")?.Value ?? httpContext.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value);
-    };
-});
 
 app.UseAuthentication();
 
