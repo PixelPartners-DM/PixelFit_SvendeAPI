@@ -36,7 +36,7 @@ namespace PixelFit_SvendeAPI.Controllers
         {
             var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
-            _logger.LogDebug("Login attempt for {Email} from {IP}", dto?.Email ?? "null", ip);
+            _logger.LogInformation("Login attempt for {Email} from {IP}", dto?.Email ?? "null", ip);
 
             // Finder brugeren ud fra email
             var user = await _userManager.FindByEmailAsync(dto.Email);
