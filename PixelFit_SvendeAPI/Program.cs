@@ -30,13 +30,19 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Logging.ClearProviders();
-builder.Logging.AddSerilog();
 
-Log.Information("Serilog is working!");
-
-// register Serilog logger into DI so Serilog.ILogger can be injected
-builder.Services.AddSingleton<Serilog.ILogger>(Log.Logger);
+// Ensure Host Serilog writes to the same file sink and reads DI
+builder.Host.UseSerilog((hostingContext, services, loggerConfig) =>
+    loggerConfig
+        .MinimumLevel.Information()
+        .ReadFrom.Configuration(hostingContext.Configuration)
+        .ReadFrom.Services(services)
+        .Enrich.FromLogContext()
+        .WriteTo.File(
+            "/var/log/pixelfit/api.log",
+            rollingInterval: RollingInterval.Day,
+            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+        ));
 
 // Tilføjer Controllers til REST API'et
 // JsonStringEnumConverter gør at enums kan sendes som tekst.
@@ -229,19 +235,6 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 });
 
 var app = builder.Build();
-
-// Ensure Host Serilog writes to the same file sink and reads DI
-builder.Host.UseSerilog((hostingContext, services, loggerConfig) =>
-    loggerConfig
-        .MinimumLevel.Information()
-        .ReadFrom.Configuration(hostingContext.Configuration)
-        .ReadFrom.Services(services)
-        .Enrich.FromLogContext()
-        .WriteTo.File(
-            "/var/log/pixelfit/api.log",
-            rollingInterval: RollingInterval.Day,
-            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
-        ));
 
 // Sørger for at databasen bliver migreret
 // og faste data bliver seedet når API'et starter.
