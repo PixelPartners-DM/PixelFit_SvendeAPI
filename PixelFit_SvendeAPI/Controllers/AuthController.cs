@@ -50,7 +50,7 @@ namespace PixelFit_SvendeAPI.Controllers
             if (user == null)
             {
                 _logger.LogWarning("Failed login: unknown email {Email} from {IP}", dto.Email, ip);
-                await _discordWebhookService.SendLoginNotificationAsync(dto.Email, null, ip, success: false, failureReason: "unknown email");
+                _ = _discordWebhookService.SendLoginNotificationAsync(dto.Email, null, ip, success: false, failureReason: "unknown email");
                 return Unauthorized(new
                 {
                     message = "Forkert email eller adgangskode."
@@ -68,7 +68,7 @@ namespace PixelFit_SvendeAPI.Controllers
             if (!passwordCorrect)
             {
                 _logger.LogWarning("Failed login: invalid password for user id {UserId} ({Email}) from {IP}", user.Id, dto.Email, ip);
-                await _discordWebhookService.SendLoginNotificationAsync(dto.Email, user.Id.ToString(), ip, success: false, failureReason: "invalid password");
+                _ = _discordWebhookService.SendLoginNotificationAsync(dto.Email, user.Id.ToString(), ip, success: false, failureReason: "invalid password");
                 return Unauthorized(new
                 {
                     message = "Forkert email eller adgangskode."
@@ -79,7 +79,7 @@ namespace PixelFit_SvendeAPI.Controllers
             var token = _jwtService.CreateToken(user);
 
             _logger.LogInformation("Successful login for user id {UserId} ({Email}) from {IP}", user.Id, user.Email, ip);
-            await _discordWebhookService.SendLoginNotificationAsync(user.Email, user.Id.ToString(), ip, success: true);
+            _ = _discordWebhookService.SendLoginNotificationAsync(user.Email, user.Id.ToString(), ip, success: true);
 
             // Sender token tilbage til MAUI-appen
             return Ok(new

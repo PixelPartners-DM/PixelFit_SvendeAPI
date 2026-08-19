@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace PixelFit_SvendeAPI.Services
 {
@@ -14,11 +15,13 @@ namespace PixelFit_SvendeAPI.Services
     {
         private readonly HttpClient _http;
         private readonly string _webhookUrl;
+        private readonly ILogger<DiscordWebhookService> _logger;
 
-        public DiscordWebhookService(HttpClient http, IConfiguration config)
+        public DiscordWebhookService(HttpClient http, IConfiguration config, ILogger<DiscordWebhookService> logger)
         {
             _http = http;
             _webhookUrl = config["Discord:WebhookUrl"] ?? string.Empty;
+            _logger = logger;
         }
 
         public async Task SendLoginNotificationAsync(string email, string? userId, string ip, bool success, string? failureReason = null)
@@ -32,9 +35,21 @@ namespace PixelFit_SvendeAPI.Services
 
             var payload = new { content = contentText };
 
-            var json = JsonSerializer.Serialize(payload);
-            using var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
-            await _http.PostAsync(_webhookUrl, httpContent);
+            try
+            {
+                var json = JsonSerializer.Serialize(payload);
+                using var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+                var resp = await _http.PostAsync(_webhookUrl, httpContent);
+                if (!resp.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning("Discord webhook responded {StatusCode} for payload: {Payload}", resp.StatusCode, contentText);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Swallow exceptions so webhook failures do not affect callers
+                _logger.LogWarning(ex, "Failed to send Discord webhook for login notification for {Email}", email);
+            }
         }
     }
 }
