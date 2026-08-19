@@ -237,6 +237,8 @@ builder.Services.AddScoped<
 
 builder.Services.AddScoped<JwtService>();
 
+builder.Services.AddHttpClient<IDiscordWebhookService, DiscordWebhookService>();
+
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders =
