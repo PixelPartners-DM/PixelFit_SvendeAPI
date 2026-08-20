@@ -64,7 +64,6 @@ namespace PixelFit_SvendeAPI.Controllers
             );
         }
 
-        // Henter en bruger ud fra id
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {

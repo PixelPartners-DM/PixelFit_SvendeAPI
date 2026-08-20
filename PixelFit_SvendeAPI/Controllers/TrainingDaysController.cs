@@ -7,13 +7,10 @@ using System.Security.Claims;
 
 namespace PixelFit_SvendeAPI.Controllers
 {
-    // Alle endpoints i controlleren kræver et gyldigt JWT-token
     [Authorize]
 
-    // Fortæller ASP.NET Core at dette er en API-controller
     [ApiController]
 
-    // Alle endpoints starter med api/TrainingDays
     [Route("api/[controller]")]
     public class TrainingDaysController : ControllerBase
     {
@@ -66,7 +63,6 @@ namespace PixelFit_SvendeAPI.Controllers
 
 
             // Sikrer at programmet tilhører
-            // den bruger som er logget ind
             if (program.UserId != userId)
             {
                 return NotFound();
@@ -94,7 +90,6 @@ namespace PixelFit_SvendeAPI.Controllers
         }
 
 
-        // Opretter en ny træningsdag
         [HttpPost]
         public async Task<IActionResult> Create(
     [FromBody] CreateTrainingDayDto dto)
@@ -210,7 +205,6 @@ namespace PixelFit_SvendeAPI.Controllers
 
 
             // Sikrer at programmet tilhører
-            // den loggede bruger
             if (program == null ||
                 program.UserId != userId)
             {
@@ -269,7 +263,6 @@ namespace PixelFit_SvendeAPI.Controllers
         }
 
 
-        // Sletter en træningsdag
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

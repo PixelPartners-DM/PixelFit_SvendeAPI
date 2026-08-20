@@ -7,19 +7,15 @@ using System.Security.Claims;
 
 namespace PixelFit_SvendeAPI.Controllers
 {
-    // Alle endpoints i denne controller kræver login/JWT
     [Authorize]
 
-    // Fortæller ASP.NET Core at dette er en API-controller
     [ApiController]
 
-    // Endpoint starter med api/TrainingPrograms
     [Route("api/[controller]")]
     public class TrainingProgramsController : ControllerBase
     {
         private readonly ITrainingProgramService _service;
 
-        // Får adgang til service-laget gennem Dependency Injection
         public TrainingProgramsController(
             ITrainingProgramService service)
         {
@@ -27,7 +23,6 @@ namespace PixelFit_SvendeAPI.Controllers
         }
 
 
-        // Henter brugerens id fra JWT-tokenet
         private int GetUserId()
         {
             var userId = User.FindFirstValue(
@@ -39,8 +34,6 @@ namespace PixelFit_SvendeAPI.Controllers
 
 
 
-        // GET: api/TrainingPrograms
-        // Henter alle programmer for den loggede bruger
         [HttpGet]
         public async Task<IActionResult> GetPrograms()
         {
@@ -64,8 +57,6 @@ namespace PixelFit_SvendeAPI.Controllers
 
 
 
-        // POST: api/TrainingPrograms
-        // Opretter et nyt træningsprogram
         [HttpPost]
         public async Task<IActionResult> CreateProgram(
             [FromBody] CreateTrainingProgramDto dto)
@@ -97,8 +88,6 @@ namespace PixelFit_SvendeAPI.Controllers
         }
 
 
-        // PUT: api/TrainingPrograms/5
-        // Opdaterer navnet på et træningsprogram
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateProgram(
             int id,
@@ -140,8 +129,6 @@ namespace PixelFit_SvendeAPI.Controllers
         }
 
 
-        // DELETE: api/TrainingPrograms/5
-        // Sletter et træningsprogram
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProgram(int id)
         {
@@ -175,8 +162,6 @@ namespace PixelFit_SvendeAPI.Controllers
                 });
             }
 
-            // 204 betyder at handlingen lykkedes,
-            // men der ikke er noget indhold at sende tilbage
             return NoContent();
         }
     }

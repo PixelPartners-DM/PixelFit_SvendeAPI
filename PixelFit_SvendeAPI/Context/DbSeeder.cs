@@ -82,7 +82,6 @@ namespace PixelFit_SvendeAPI.Data
 
 
             // Henter Bryst fra databasen.
-            // Nu har den også et rigtigt database-id.
             var chest =
                 await context.MuscleGroups
                     .FirstAsync(

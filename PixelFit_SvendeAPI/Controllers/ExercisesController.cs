@@ -5,7 +5,6 @@ using PixelFit_SvendeAPI.Services.Interfaces;
 
 namespace PixelFit_SvendeAPI.Controllers
 {
-    // Alle endpoints kræver login med JWT
     [Authorize]
 
     [ApiController]
@@ -16,7 +15,6 @@ namespace PixelFit_SvendeAPI.Controllers
         private readonly IExerciseService _exerciseService;
 
 
-        // Får ExerciseService gennem Dependency Injection
         public ExercisesController(
             IExerciseService exerciseService)
         {
@@ -65,7 +63,6 @@ namespace PixelFit_SvendeAPI.Controllers
                 await _exerciseService.GetByIdAsync(id);
 
 
-            // Hvis øvelsen ikke findes
             if (exercise == null)
             {
                 return NotFound();

@@ -7,13 +7,10 @@ using System.Security.Claims;
 
 namespace PixelFit_SvendeAPI.Controllers
 {
-    // Alle endpoints kræver login med JWT
     [Authorize]
 
-    // Fortæller ASP.NET Core at dette er en API-controller
     [ApiController]
 
-    // Endpoint starter med api/TrainingDayExercises
     [Route("api/[controller]")]
     public class TrainingDayExercisesController : ControllerBase
     {
@@ -48,7 +45,6 @@ namespace PixelFit_SvendeAPI.Controllers
         }
 
 
-        // GET: api/TrainingDayExercises/day/1
         // Henter alle valgte øvelser til en bestemt træningsdag
         [HttpGet("day/{trainingDayId}")]
         public async Task<IActionResult> GetByTrainingDay(
@@ -105,7 +101,6 @@ namespace PixelFit_SvendeAPI.Controllers
         }
 
 
-        // POST: api/TrainingDayExercises
         // Tilføjer en øvelse til en træningsdag
         [HttpPost]
         public async Task<IActionResult> Create(
@@ -219,7 +214,6 @@ namespace PixelFit_SvendeAPI.Controllers
         }
 
 
-        // PUT: api/TrainingDayExercises/1
         // Opdaterer pause eller rækkefølge på en valgt øvelse
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(
@@ -290,7 +284,6 @@ namespace PixelFit_SvendeAPI.Controllers
         }
 
 
-        // DELETE: api/TrainingDayExercises/1
         // Fjerner en øvelse fra træningsdagen
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)

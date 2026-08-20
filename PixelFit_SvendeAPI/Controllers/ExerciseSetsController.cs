@@ -23,7 +23,6 @@ namespace PixelFit_SvendeAPI.Controllers
         private readonly ITrainingProgramService _trainingProgramService;
 
 
-        // Får services gennem Dependency Injection
         public ExerciseSetsController(
             IExerciseSetService exerciseSetService,
             ITrainingDayExerciseService trainingDayExerciseService,
@@ -37,7 +36,6 @@ namespace PixelFit_SvendeAPI.Controllers
         }
 
 
-        // Henter brugerens id fra JWT-tokenet
         private int GetUserId()
         {
             var userId = User.FindFirstValue(
@@ -49,7 +47,6 @@ namespace PixelFit_SvendeAPI.Controllers
 
 
 
-        // GET: api/ExerciseSets/exercise/1
         [HttpGet("exercise/{trainingDayExerciseId}")]
         public async Task<IActionResult> GetByTrainingDayExercise(
             int trainingDayExerciseId)
@@ -125,7 +122,6 @@ namespace PixelFit_SvendeAPI.Controllers
 
 
 
-        // POST: api/ExerciseSets
         // Opretter et nyt sæt
         [HttpPost]
         public async Task<IActionResult> Create(
@@ -221,7 +217,6 @@ namespace PixelFit_SvendeAPI.Controllers
 
 
 
-        // PUT: api/ExerciseSets/1
         // Opdaterer reps, vægt eller pause
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(
@@ -317,7 +312,6 @@ namespace PixelFit_SvendeAPI.Controllers
 
 
 
-        // DELETE: api/ExerciseSets/1
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

@@ -5,13 +5,10 @@ using PixelFit_SvendeAPI.Services.Interfaces;
 
 namespace PixelFit_SvendeAPI.Controllers
 {
-    // Kræver at brugeren er logget ind med JWT
     [Authorize]
 
-    // Fortæller ASP.NET Core at dette er en API-controller
     [ApiController]
 
-    // Endpoint starter med api/MuscleGroups
     [Route("api/[controller]")]
     public class MuscleGroupsController : ControllerBase
     {
@@ -26,8 +23,6 @@ namespace PixelFit_SvendeAPI.Controllers
         }
 
 
-        // GET: api/MuscleGroups
-        // Henter alle muskelgrupper
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -51,8 +46,6 @@ namespace PixelFit_SvendeAPI.Controllers
         }
 
 
-        // GET: api/MuscleGroups/1
-        // Henter én bestemt muskelgruppe
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
