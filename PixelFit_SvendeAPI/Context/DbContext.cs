@@ -14,22 +14,30 @@ namespace PixelFit_SvendeAPI.Data
         {
         }
 
-        // Træningsprogrammer
         public DbSet<TrainingProgram> TrainingPrograms { get; set; }
 
-        // Træningsdage
         public DbSet<TrainingDay> TrainingDays { get; set; }
 
-        // Muskelgrupper
         public DbSet<MuscleGroup> MuscleGroups { get; set; }
 
-        // Øvelsesbibliotek
         public DbSet<Exercise> Exercises { get; set; }
 
-        // Øvelser som brugeren har valgt til en træningsdag
         public DbSet<TrainingDayExercise> TrainingDayExercises { get; set; }
 
-        // Sæt til de valgte øvelser
         public DbSet<ExerciseSet> ExerciseSets { get; set; }
+
+        public DbSet<TrainingHistory> TrainingHistories { get; set; }
+
+
+        public DbSet<UserProfile> UserProfiles { get; set; }
+
+        public DbSet<DailyNutritionSummary> DailyNutritionSummaries { get; set; }
+
+
+        public DbSet<Meal> Meals { get; set; }
+
+        public DbSet<FoodItem> FoodItems { get; set; }
+
+        public DbSet<WeightEntry> WeightEntries { get; set; }
     }
 }

@@ -173,6 +173,77 @@ namespace PixelFit_SvendeAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "DailyNutritionSummaries",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TotalCalories = table.Column<int>(type: "int", nullable: false),
+                    RemainingCalories = table.Column<int>(type: "int", nullable: false),
+                    Protein = table.Column<double>(type: "float", nullable: false),
+                    Carbs = table.Column<double>(type: "float", nullable: false),
+                    Fat = table.Column<double>(type: "float", nullable: false),
+                    Fiber = table.Column<double>(type: "float", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DailyNutritionSummaries", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DailyNutritionSummaries_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Meals",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    MealType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Meals", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Meals_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TrainingHistories",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId1 = table.Column<int>(type: "int", nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    MuscleGroups = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TotalWeightLifted = table.Column<int>(type: "int", nullable: false),
+                    DurationMinutes = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TrainingHistories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TrainingHistories_AspNetUsers_UserId1",
+                        column: x => x.UserId1,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TrainingPrograms",
                 columns: table => new
                 {
@@ -187,6 +258,55 @@ namespace PixelFit_SvendeAPI.Migrations
                     table.ForeignKey(
                         name: "FK_TrainingPrograms_AspNetUsers_UserId",
                         column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserProfiles",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    Gender = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Age = table.Column<int>(type: "int", nullable: false),
+                    Height = table.Column<int>(type: "int", nullable: false),
+                    Weight = table.Column<double>(type: "float", nullable: false),
+                    ActivityLevel = table.Column<double>(type: "float", nullable: false),
+                    BMR = table.Column<double>(type: "float", nullable: false),
+                    TDEE = table.Column<double>(type: "float", nullable: false),
+                    DailyCalorieGoal = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserProfiles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserProfiles_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "WeightEntries",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId1 = table.Column<int>(type: "int", nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Weight = table.Column<double>(type: "float", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_WeightEntries", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_WeightEntries_AspNetUsers_UserId1",
+                        column: x => x.UserId1,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -209,6 +329,31 @@ namespace PixelFit_SvendeAPI.Migrations
                         name: "FK_Exercises_MuscleGroups_MuscleGroupId",
                         column: x => x.MuscleGroupId,
                         principalTable: "MuscleGroups",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FoodItems",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    MealId = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Calories = table.Column<int>(type: "int", nullable: false),
+                    Protein = table.Column<double>(type: "float", nullable: false),
+                    Carbs = table.Column<double>(type: "float", nullable: false),
+                    Fat = table.Column<double>(type: "float", nullable: false),
+                    Fiber = table.Column<double>(type: "float", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FoodItems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FoodItems_Meals_MealId",
+                        column: x => x.MealId,
+                        principalTable: "Meals",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -323,6 +468,11 @@ namespace PixelFit_SvendeAPI.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DailyNutritionSummaries_UserId",
+                table: "DailyNutritionSummaries",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Exercises_MuscleGroupId",
                 table: "Exercises",
                 column: "MuscleGroupId");
@@ -331,6 +481,16 @@ namespace PixelFit_SvendeAPI.Migrations
                 name: "IX_ExerciseSets_TrainingDayExerciseId",
                 table: "ExerciseSets",
                 column: "TrainingDayExerciseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FoodItems_MealId",
+                table: "FoodItems",
+                column: "MealId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Meals_UserId",
+                table: "Meals",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TrainingDayExercises_ExerciseId",
@@ -348,9 +508,24 @@ namespace PixelFit_SvendeAPI.Migrations
                 column: "TrainingProgramId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_TrainingHistories_UserId1",
+                table: "TrainingHistories",
+                column: "UserId1");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_TrainingPrograms_UserId",
                 table: "TrainingPrograms",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserProfiles_UserId",
+                table: "UserProfiles",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_WeightEntries_UserId1",
+                table: "WeightEntries",
+                column: "UserId1");
         }
 
         /// <inheritdoc />
@@ -372,13 +547,31 @@ namespace PixelFit_SvendeAPI.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "DailyNutritionSummaries");
+
+            migrationBuilder.DropTable(
                 name: "ExerciseSets");
+
+            migrationBuilder.DropTable(
+                name: "FoodItems");
+
+            migrationBuilder.DropTable(
+                name: "TrainingHistories");
+
+            migrationBuilder.DropTable(
+                name: "UserProfiles");
+
+            migrationBuilder.DropTable(
+                name: "WeightEntries");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "TrainingDayExercises");
+
+            migrationBuilder.DropTable(
+                name: "Meals");
 
             migrationBuilder.DropTable(
                 name: "Exercises");

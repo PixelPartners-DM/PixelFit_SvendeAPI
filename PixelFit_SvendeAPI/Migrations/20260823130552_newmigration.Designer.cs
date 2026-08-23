@@ -12,7 +12,7 @@ using PixelFit_SvendeAPI.Data;
 namespace PixelFit_SvendeAPI.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260816094934_newmigration")]
+    [Migration("20260823130552_newmigration")]
     partial class newmigration
     {
         /// <inheritdoc />
@@ -158,6 +158,45 @@ namespace PixelFit_SvendeAPI.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("PixelFit_SvendeAPI.Models.DailyNutritionSummary", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<double>("Carbs")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double>("Fat")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Fiber")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Protein")
+                        .HasColumnType("float");
+
+                    b.Property<int>("RemainingCalories")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalCalories")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("DailyNutritionSummaries");
+                });
+
             modelBuilder.Entity("PixelFit_SvendeAPI.Models.Exercise", b =>
                 {
                     b.Property<int>("Id")
@@ -209,6 +248,68 @@ namespace PixelFit_SvendeAPI.Migrations
                     b.HasIndex("TrainingDayExerciseId");
 
                     b.ToTable("ExerciseSets");
+                });
+
+            modelBuilder.Entity("PixelFit_SvendeAPI.Models.FoodItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Calories")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Carbs")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Fat")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Fiber")
+                        .HasColumnType("float");
+
+                    b.Property<int>("MealId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("Protein")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MealId");
+
+                    b.ToTable("FoodItems");
+                });
+
+            modelBuilder.Entity("PixelFit_SvendeAPI.Models.Meal", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("MealType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Meals");
                 });
 
             modelBuilder.Entity("PixelFit_SvendeAPI.Models.MuscleGroup", b =>
@@ -276,6 +377,41 @@ namespace PixelFit_SvendeAPI.Migrations
                     b.HasIndex("TrainingDayId");
 
                     b.ToTable("TrainingDayExercises");
+                });
+
+            modelBuilder.Entity("PixelFit_SvendeAPI.Models.TrainingHistory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DurationMinutes")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MuscleGroups")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TotalWeightLifted")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId1")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId1");
+
+                    b.ToTable("TrainingHistories");
                 });
 
             modelBuilder.Entity("PixelFit_SvendeAPI.Models.TrainingProgram", b =>
@@ -371,6 +507,77 @@ namespace PixelFit_SvendeAPI.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("PixelFit_SvendeAPI.Models.UserProfile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<double>("ActivityLevel")
+                        .HasColumnType("float");
+
+                    b.Property<int>("Age")
+                        .HasColumnType("int");
+
+                    b.Property<double>("BMR")
+                        .HasColumnType("float");
+
+                    b.Property<int>("DailyCalorieGoal")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Height")
+                        .HasColumnType("int");
+
+                    b.Property<double>("TDEE")
+                        .HasColumnType("float");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Weight")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserProfiles");
+                });
+
+            modelBuilder.Entity("PixelFit_SvendeAPI.Models.WeightEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId1")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Weight")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId1");
+
+                    b.ToTable("WeightEntries");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<int>", null)
@@ -422,6 +629,17 @@ namespace PixelFit_SvendeAPI.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("PixelFit_SvendeAPI.Models.DailyNutritionSummary", b =>
+                {
+                    b.HasOne("PixelFit_SvendeAPI.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("PixelFit_SvendeAPI.Models.Exercise", b =>
                 {
                     b.HasOne("PixelFit_SvendeAPI.Models.MuscleGroup", "MuscleGroup")
@@ -442,6 +660,28 @@ namespace PixelFit_SvendeAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("TrainingDayExercise");
+                });
+
+            modelBuilder.Entity("PixelFit_SvendeAPI.Models.FoodItem", b =>
+                {
+                    b.HasOne("PixelFit_SvendeAPI.Models.Meal", "Meal")
+                        .WithMany("Items")
+                        .HasForeignKey("MealId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Meal");
+                });
+
+            modelBuilder.Entity("PixelFit_SvendeAPI.Models.Meal", b =>
+                {
+                    b.HasOne("PixelFit_SvendeAPI.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("PixelFit_SvendeAPI.Models.TrainingDay", b =>
@@ -474,6 +714,17 @@ namespace PixelFit_SvendeAPI.Migrations
                     b.Navigation("TrainingDay");
                 });
 
+            modelBuilder.Entity("PixelFit_SvendeAPI.Models.TrainingHistory", b =>
+                {
+                    b.HasOne("PixelFit_SvendeAPI.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("PixelFit_SvendeAPI.Models.TrainingProgram", b =>
                 {
                     b.HasOne("PixelFit_SvendeAPI.Models.User", "User")
@@ -483,6 +734,33 @@ namespace PixelFit_SvendeAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("PixelFit_SvendeAPI.Models.UserProfile", b =>
+                {
+                    b.HasOne("PixelFit_SvendeAPI.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("PixelFit_SvendeAPI.Models.WeightEntry", b =>
+                {
+                    b.HasOne("PixelFit_SvendeAPI.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("PixelFit_SvendeAPI.Models.Meal", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("PixelFit_SvendeAPI.Models.MuscleGroup", b =>
