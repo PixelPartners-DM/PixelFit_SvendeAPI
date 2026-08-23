@@ -5,9 +5,11 @@
         public int Id { get; set; }
 
         public int UserId { get; set; }
-        public User User { get; set; }
 
-        public string MealType { get; set; } // Morgenmad, Frokost, Aftensmad, Snack
+        public User User { get; set; } = null!;
+
+        public string MealType { get; set; } = string.Empty;
+
         public DateTime Date { get; set; }
 
         public List<FoodItem> Items { get; set; } = new();

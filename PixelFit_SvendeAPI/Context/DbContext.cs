@@ -39,5 +39,7 @@ namespace PixelFit_SvendeAPI.Data
         public DbSet<FoodItem> FoodItems { get; set; }
 
         public DbSet<WeightEntry> WeightEntries { get; set; }
+
+
     }
 }
