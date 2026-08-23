@@ -36,18 +36,17 @@ namespace PixelFit_SvendeAPI.Data
 
 
             await AddExercise(
-                context,
-                "Bench Press",
-                "Bryst",
-                "images/exercises/BenchPress.webp"
-            );
-
+            context,
+            "Bench Press",
+            "Bryst",
+            "images/exercises/BenchPress.webp"
+ );
 
             await AddExercise(
                 context,
                 "Leg Extension",
                 "Ben",
-                "images/legEx.jpg"
+                "images/exercises/legEx.jpg"
             );
         }
 
