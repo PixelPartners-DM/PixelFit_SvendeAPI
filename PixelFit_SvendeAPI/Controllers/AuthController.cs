@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using PixelFit_SvendeAPI.DTOS;
 using PixelFit_SvendeAPI.Models;
 using PixelFit_SvendeAPI.Services;
@@ -13,23 +15,27 @@ namespace PixelFit_SvendeAPI.Controllers
         private readonly UserManager<User> _userManager;
         private readonly JwtService _jwtService;
         private readonly ILogger<AuthController> _logger;
+        private readonly IDiscordWebhookService _discordWebhookService;
 
 
         // Dependency Injection giver controlleren adgang til
-        // brugerhåndtering, JWT-service og logging
+        // brugerhåndtering, JWT-service, logging og webhook-service
         public AuthController(
             UserManager<User> userManager,
             JwtService jwtService,
-            ILogger<AuthController> logger)
+            ILogger<AuthController> logger,
+            IDiscordWebhookService discordWebhookService)
         {
             _userManager = userManager;
             _jwtService = jwtService;
             _logger = logger;
+            _discordWebhookService = discordWebhookService;
         }
 
 
 
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(
             [FromBody] LoginDto dto)
         {
@@ -66,6 +72,15 @@ namespace PixelFit_SvendeAPI.Controllers
                 );
 
 
+                // Notify discord (fire-and-forget so login latency isn't affected)
+                _ = _discordWebhookService.SendLoginNotificationAsync(
+                    dto.Email,
+                    null,
+                    ip,
+                    success: false,
+                    failureReason: "unknown email"
+                );
+
                 return Unauthorized(new
                 {
                     message =
@@ -92,6 +107,15 @@ namespace PixelFit_SvendeAPI.Controllers
                 );
 
 
+                // Notify discord (fire-and-forget)
+                _ = _discordWebhookService.SendLoginNotificationAsync(
+                    dto.Email,
+                    user.Id.ToString(),
+                    ip,
+                    success: false,
+                    failureReason: "invalid password"
+                );
+
                 return Unauthorized(new
                 {
                     message =
@@ -105,13 +129,20 @@ namespace PixelFit_SvendeAPI.Controllers
                 ip
             );
 
+            // Notify discord (fire-and-forget)
+            _ = _discordWebhookService.SendLoginNotificationAsync(
+                user.Email,
+                user.Id.ToString(),
+                ip,
+                success: true
+            );
+
 
             // Opretter JWT-token til brugeren
             var token =
                 _jwtService.CreateToken(
                     user
                 );
-
 
             // Sender token tilbage til MAUI-appen
             return Ok(new
