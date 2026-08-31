@@ -10,7 +10,6 @@
         // Navigation property til brugeren
         public User User { get; set; } = null!;
 
-        // Navnet på træningsprogrammet
         public string Name { get; set; } = string.Empty;
 
         // Træningsdage som hører til programmet

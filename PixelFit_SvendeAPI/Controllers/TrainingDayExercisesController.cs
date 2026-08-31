@@ -101,7 +101,6 @@ namespace PixelFit_SvendeAPI.Controllers
         }
 
 
-        // Tilføjer en øvelse til en træningsdag
         [HttpPost]
         public async Task<IActionResult> Create(
             [FromBody] CreateTrainingDayExerciseDto dto)
@@ -170,7 +169,6 @@ namespace PixelFit_SvendeAPI.Controllers
                 });
             }
 
-            // Opretter koblingen mellem dag og øvelse
             var trainingDayExercise =
                 new TrainingDayExercise
                 {
@@ -249,7 +247,7 @@ namespace PixelFit_SvendeAPI.Controllers
                     trainingDay.TrainingProgramId
                 );
 
-            // Sikkerhed: kun ejer må redigere
+            // Sikkerhed kun ejer må redigere
             if (program == null ||
                 program.UserId != userId)
             {

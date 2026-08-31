@@ -72,7 +72,7 @@ namespace PixelFit_SvendeAPI.Controllers
                 );
 
 
-                // Notify discord (fire-and-forget so login latency isn't affected)
+                // hvis ikke brugeren ikke findes send som webhook
                 _ = _discordWebhookService.SendLoginNotificationAsync(
                     dto.Email,
                     null,
@@ -97,7 +97,6 @@ namespace PixelFit_SvendeAPI.Controllers
                 );
 
 
-            // Hvis adgangskoden er forkert
             if (!passwordCorrect)
             {
                 _logger.LogWarning(
@@ -107,7 +106,7 @@ namespace PixelFit_SvendeAPI.Controllers
                 );
 
 
-                // Notify discord (fire-and-forget)
+                // informere adgangskode ikke er korrekt
                 _ = _discordWebhookService.SendLoginNotificationAsync(
                     dto.Email,
                     user.Id.ToString(),
@@ -129,7 +128,7 @@ namespace PixelFit_SvendeAPI.Controllers
                 ip
             );
 
-            // Notify discord (fire-and-forget)
+            // informere på discord at login er gået igennem 
             _ = _discordWebhookService.SendLoginNotificationAsync(
                 user.Email,
                 user.Id.ToString(),

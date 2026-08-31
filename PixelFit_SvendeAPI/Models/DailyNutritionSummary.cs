@@ -4,19 +4,26 @@
     {
         public int Id { get; set; }
 
-        // Brugeren som denne dags kostdata tilhører
         // User bruger IdentityUser<int>, derfor skal UserId være int
+        
         public int UserId { get; set; }
 
+
+        //navigation property
         public User User { get; set; } = null!;
 
         // Datoen for registreringen
         public DateTime Date { get; set; }
 
+
+
         // Kalorier
         public int TotalCalories { get; set; }
 
         public int RemainingCalories { get; set; }
+
+
+
 
         // Makronæringsstoffer
         public double Protein { get; set; }

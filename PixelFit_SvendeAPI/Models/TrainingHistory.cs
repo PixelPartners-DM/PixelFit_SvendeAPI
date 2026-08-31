@@ -9,7 +9,7 @@
 
         public DateTime Date { get; set; }
 
-        public string MuscleGroups { get; set; } // fx "Bryst, Triceps"
+        public string MuscleGroups { get; set; } 
         public int TotalWeightLifted { get; set; }
         public int DurationMinutes { get; set; }
     }

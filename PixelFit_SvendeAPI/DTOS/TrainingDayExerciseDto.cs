@@ -2,16 +2,13 @@
 {
     public class TrainingDayExerciseDto
     {
-        // Id på koblingen mellem træningsdag og øvelse
+        // Id på forbindelsen mellem træningsdag og øvelse
         public int Id { get; set; }
 
-        // Id på træningsdagen
         public int TrainingDayId { get; set; }
 
-        // Id på øvelsen
         public int ExerciseId { get; set; }
 
-        // Navnet på øvelsen
         public string ExerciseName { get; set; } = string.Empty;
 
         // Billedsti som MAUI bruger til at vise øvelsen

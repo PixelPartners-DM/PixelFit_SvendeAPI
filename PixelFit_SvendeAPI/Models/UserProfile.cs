@@ -4,7 +4,6 @@
     {
         public int Id { get; set; }
 
-        // Brugeren som profilen tilhører
         public int UserId { get; set; }
 
         public User User { get; set; } = null!;

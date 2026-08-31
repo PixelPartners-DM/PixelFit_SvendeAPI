@@ -16,7 +16,6 @@ namespace PixelFit_SvendeAPI.Controllers
             _userService = userService;
         }
 
-        // Opretter en ny bruger
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserRegisterDto dto)
         {

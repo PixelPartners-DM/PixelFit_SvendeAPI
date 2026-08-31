@@ -4,8 +4,7 @@
     {
         public int Id { get; set; }
 
-        // Navnet på øvelsen
-        // Fx. "Bench Press"
+       
         public string Name { get; set; } = string.Empty;
 
         // Hvilken muskelgruppe øvelsen tilhører

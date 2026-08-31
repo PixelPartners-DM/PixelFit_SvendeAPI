@@ -13,7 +13,6 @@ namespace PixelFit_SvendeAPI.Controllers
     // Fortæller ASP.NET Core at dette er en API-controller
     [ApiController]
 
-    // Endpoint starter med api/ExerciseSets
     [Route("api/[controller]")]
     public class ExerciseSetsController : ControllerBase
     {
@@ -122,7 +121,6 @@ namespace PixelFit_SvendeAPI.Controllers
 
 
 
-        // Opretter et nyt sæt
         [HttpPost]
         public async Task<IActionResult> Create(
             [FromBody] CreateExerciseSetDto dto)
@@ -217,7 +215,6 @@ namespace PixelFit_SvendeAPI.Controllers
 
 
 
-        // Opdaterer reps, vægt eller pause
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(
             int id,
