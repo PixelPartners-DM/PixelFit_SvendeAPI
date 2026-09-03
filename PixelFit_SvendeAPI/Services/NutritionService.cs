@@ -14,7 +14,7 @@ namespace PixelFit_SvendeAPI.Services
             _repository = repository;
         }
 
-        public async Task<(DailyNutritionSummary Summary, List<Meal> Meals)> GetTodayAsync(int userId)
+        public async Task<(DailyNutritionSummary Summary, int DailyCalorieGoal, List<Meal> Meals)> GetTodayAsync(int userId)
         {
             var today = DateTime.Today;
             var tomorrow = today.AddDays(1);
@@ -42,7 +42,7 @@ namespace PixelFit_SvendeAPI.Services
                 Fiber = fiber
             };
 
-            return (summary, meals);
+            return (summary, dailyGoal, meals);
         }
 
         public async Task<Meal> CreateMealAsync(int userId, CreateMealRequest request)

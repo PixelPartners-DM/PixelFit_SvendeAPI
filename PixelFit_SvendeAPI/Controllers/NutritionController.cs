@@ -33,12 +33,12 @@ namespace PixelFit_SvendeAPI.Controllers
         public async Task<IActionResult> GetToday()
         {
             var userId = GetUserId();
-            var (summary, meals) = await _nutritionService.GetTodayAsync(userId);
+            var (summary, dailyGoal, meals) = await _nutritionService.GetTodayAsync(userId);
 
             var result = new
             {
                 Date = summary.Date,
-                DailyCalorieGoal = 0, // kept for compatibility; profile.DailyCalorieGoal not persisted in summary model
+                DailyCalorieGoal = dailyGoal,
                 TotalCalories = summary.TotalCalories,
                 RemainingCalories = summary.RemainingCalories,
                 Protein = summary.Protein,
