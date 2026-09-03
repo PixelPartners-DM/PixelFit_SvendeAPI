@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using PixelFit_SvendeAPI.Data;
-using PixelFit_SvendeAPI.Models;
-using System.Security.Claims;
 using PixelFit_SvendeAPI.DTOS.Nutrition;
+using PixelFit_SvendeAPI.Services.Interfaces;
+using System.Security.Claims;
 
 namespace PixelFit_SvendeAPI.Controllers
 {
@@ -13,15 +11,13 @@ namespace PixelFit_SvendeAPI.Controllers
     [Route("api/[controller]")]
     public class NutritionController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly INutritionService _nutritionService;
 
         public NutritionController(
-            ApplicationDbContext context)
+            INutritionService nutritionService)
         {
-            _context = context;
+            _nutritionService = nutritionService;
         }
-
-
 
         private int GetUserId()
         {
@@ -33,342 +29,111 @@ namespace PixelFit_SvendeAPI.Controllers
             return int.Parse(userId!);
         }
 
-
-
         [HttpGet("today")]
         public async Task<IActionResult> GetToday()
         {
-            var userId =
-                GetUserId();
-
-
-            var today =
-                DateTime.Today;
-
-
-            var tomorrow =
-                today.AddDays(1);
-
-
-            var meals =
-                await _context.Meals
-                    .Include(meal => meal.Items)
-                    .Where(
-                        meal =>
-                            meal.UserId == userId &&
-                            meal.Date >= today &&
-                            meal.Date < tomorrow
-                    )
-                    .OrderBy(meal => meal.Date)
-                    .ToListAsync();
-
-
-            var totalCalories =
-                meals
-                    .SelectMany(meal => meal.Items)
-                    .Sum(item => item.Calories);
-
-
-            var protein =
-                meals
-                    .SelectMany(meal => meal.Items)
-                    .Sum(item => item.Protein);
-
-
-            var carbs =
-                meals
-                    .SelectMany(meal => meal.Items)
-                    .Sum(item => item.Carbs);
-
-
-            var fat =
-                meals
-                    .SelectMany(meal => meal.Items)
-                    .Sum(item => item.Fat);
-
-
-            var fiber =
-                meals
-                    .SelectMany(meal => meal.Items)
-                    .Sum(item => item.Fiber);
-
-
-            // Henter brugerens gemte kaloriemål
-            var profile =
-                await _context.UserProfiles
-                    .FirstOrDefaultAsync(
-                        profile =>
-                            profile.UserId == userId
-                    );
-
-
-            var dailyGoal =
-                profile?.DailyCalorieGoal ?? 0;
-
-
-            var remainingCalories =
-                dailyGoal > 0
-                    ? Math.Max(
-                        0,
-                        dailyGoal - totalCalories
-                    )
-                    : 0;
-
+            var userId = GetUserId();
+            var (summary, meals) = await _nutritionService.GetTodayAsync(userId);
 
             var result = new
             {
-                Date =
-                    today,
-
-                DailyCalorieGoal =
-                    dailyGoal,
-
-                TotalCalories =
-                    totalCalories,
-
-                RemainingCalories =
-                    remainingCalories,
-
-                Protein =
-                    protein,
-
-                Carbs =
-                    carbs,
-
-                Fat =
-                    fat,
-
-                Fiber =
-                    fiber,
-
-                Meals =
-                    meals.Select(
-                        meal => new
-                        {
-                            meal.Id,
-
-                            meal.MealType,
-
-                            meal.Date,
-
-                            Items =
-                                meal.Items.Select(
-                                    item => new
-                                    {
-                                        item.Id,
-
-                                        item.Name,
-
-                                        item.Calories,
-
-                                        item.Protein,
-
-                                        item.Carbs,
-
-                                        item.Fat,
-
-                                        item.Fiber
-                                    }
-                                )
-                        }
-                    )
+                Date = summary.Date,
+                DailyCalorieGoal = 0, // kept for compatibility; profile.DailyCalorieGoal not persisted in summary model
+                TotalCalories = summary.TotalCalories,
+                RemainingCalories = summary.RemainingCalories,
+                Protein = summary.Protein,
+                Carbs = summary.Carbs,
+                Fat = summary.Fat,
+                Fiber = summary.Fiber,
+                Meals = meals.Select(meal => new
+                {
+                    meal.Id,
+                    meal.MealType,
+                    meal.Date,
+                    Items = meal.Items.Select(item => new
+                    {
+                        item.Id,
+                        item.Name,
+                        item.Calories,
+                        item.Protein,
+                        item.Carbs,
+                        item.Fat,
+                        item.Fiber
+                    })
+                })
             };
-
 
             return Ok(result);
         }
-
 
         [HttpPost("meals")]
         public async Task<IActionResult> CreateMeal(
             [FromBody] CreateMealRequest request)
         {
-            var userId =
-                GetUserId();
+            var userId = GetUserId();
 
-
-            if (string.IsNullOrWhiteSpace(
-                request.MealType))
+            if (string.IsNullOrWhiteSpace(request.MealType))
             {
                 return BadRequest(new
                 {
-                    message =
-                        "Måltidstype mangler."
+                    message = "Måltidstype mangler."
                 });
             }
 
-
-            if (request.Items == null ||
-                request.Items.Count == 0)
+            if (request.Items == null || request.Items.Count == 0)
             {
                 return BadRequest(new
                 {
-                    message =
-                        "Måltidet skal indeholde mindst én madvare."
+                    message = "Måltidet skal indeholde mindst én madvare."
                 });
             }
 
-
-            var meal =
-                new Meal
-                {
-                    UserId =
-                        userId,
-
-                    MealType =
-                        request.MealType,
-
-                    Date =
-                        request.Date ??
-                        DateTime.Now,
-
-                    Items =
-                        request.Items.Select(
-                            item =>
-                                new FoodItem
-                                {
-                                    Name =
-                                        item.Name,
-
-                                    Calories =
-                                        item.Calories,
-
-                                    Protein =
-                                        item.Protein,
-
-                                    Carbs =
-                                        item.Carbs,
-
-                                    Fat =
-                                        item.Fat,
-
-                                    Fiber =
-                                        item.Fiber
-                                }
-                        )
-                        .ToList()
-                };
-
-
-            await _context.Meals.AddAsync(
-                meal
-            );
-
-
-            await _context.SaveChangesAsync();
-
+            var meal = await _nutritionService.CreateMealAsync(userId, request);
 
             return Ok(new
             {
                 meal.Id,
-
                 meal.MealType,
-
                 meal.Date,
-
-                Items =
-                    meal.Items.Select(
-                        item => new
-                        {
-                            item.Id,
-
-                            item.Name,
-
-                            item.Calories,
-
-                            item.Protein,
-
-                            item.Carbs,
-
-                            item.Fat,
-
-                            item.Fiber
-                        }
-                    )
+                Items = meal.Items.Select(item => new
+                {
+                    item.Id,
+                    item.Name,
+                    item.Calories,
+                    item.Protein,
+                    item.Carbs,
+                    item.Fat,
+                    item.Fiber
+                })
             });
         }
 
-
-
         [HttpDelete("food/{foodItemId:int}")]
-        public async Task<IActionResult> DeleteFoodItem(
-            int foodItemId)
+        public async Task<IActionResult> DeleteFoodItem(int foodItemId)
         {
-            var userId =
-                GetUserId();
+            var userId = GetUserId();
 
+            var ok = await _nutritionService.DeleteFoodItemAsync(foodItemId, userId);
 
-            var foodItem =
-                await _context.FoodItems
-                    .Include(
-                        item => item.Meal
-                    )
-                    .FirstOrDefaultAsync(
-                        item =>
-                            item.Id ==
-                            foodItemId
-                    );
-
-
-            if (foodItem == null)
+            if (!ok)
             {
                 return NotFound();
             }
-
-
-            // Brugeren må kun slette egne foods
-            if (foodItem.Meal.UserId != userId)
-            {
-                return NotFound();
-            }
-
-
-            _context.FoodItems.Remove(
-                foodItem
-            );
-
-
-            await _context.SaveChangesAsync();
-
 
             return NoContent();
         }
 
-
-
         [HttpDelete("meals/{mealId:int}")]
-        public async Task<IActionResult> DeleteMeal(
-            int mealId)
+        public async Task<IActionResult> DeleteMeal(int mealId)
         {
-            var userId =
-                GetUserId();
+            var userId = GetUserId();
 
+            var ok = await _nutritionService.DeleteMealAsync(mealId, userId);
 
-            var meal =
-                await _context.Meals
-                    .Include(
-                        meal => meal.Items
-                    )
-                    .FirstOrDefaultAsync(
-                        meal =>
-                            meal.Id == mealId &&
-                            meal.UserId == userId
-                    );
-
-
-            if (meal == null)
+            if (!ok)
             {
                 return NotFound();
             }
-
-
-            _context.Meals.Remove(
-                meal
-            );
-
-
-            await _context.SaveChangesAsync();
-
 
             return NoContent();
         }

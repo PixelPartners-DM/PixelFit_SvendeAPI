@@ -235,6 +235,14 @@ builder.Services.AddScoped<
     IExerciseSetService,
     ExerciseSetService>();
 
+builder.Services.AddScoped<
+    INutritionRepository,
+    NutritionRepository>();
+
+builder.Services.AddScoped<
+    INutritionService,
+    NutritionService>();
+
 builder.Services.AddScoped<JwtService>();
 
 builder.Services.AddHttpClient<IDiscordWebhookService, DiscordWebhookService>();
