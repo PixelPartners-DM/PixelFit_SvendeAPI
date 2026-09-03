@@ -16,12 +16,14 @@ namespace PixelFit_SvendeAPI.Controllers
     [Route("api/[controller]")]
     public class ExerciseSetsController : ControllerBase
     {
+        // Private readonly er så kun de kan ses i denne controller, og ikke kan ændres.
+        // Objekterne der bliver kaldt på i controlleren.
         private readonly IExerciseSetService _exerciseSetService;
         private readonly ITrainingDayExerciseService _trainingDayExerciseService;
         private readonly ITrainingDayService _trainingDayService;
         private readonly ITrainingProgramService _trainingProgramService;
 
-
+        // Dependency Injection giver controlleren adgang til service-laget.
         public ExerciseSetsController(
             IExerciseSetService exerciseSetService,
             ITrainingDayExerciseService trainingDayExerciseService,
@@ -37,10 +39,12 @@ namespace PixelFit_SvendeAPI.Controllers
 
         private int GetUserId()
         {
+            // Henter brugerens ID fra JWT-tokenet
             var userId = User.FindFirstValue(
                 ClaimTypes.NameIdentifier
             );
 
+            // Konverterer brugerens ID til int og returnerer det
             return int.Parse(userId!);
         }
 

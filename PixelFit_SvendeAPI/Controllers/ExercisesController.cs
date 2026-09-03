@@ -12,9 +12,11 @@ namespace PixelFit_SvendeAPI.Controllers
     [Route("api/[controller]")]
     public class ExercisesController : ControllerBase
     {
+        // Der bliver kaldt på objektet.
         private readonly IExerciseService _exerciseService;
 
-
+        // Og her bliver objektet initialiseret så man kan bruge det i controlleren.
+        // Dette kaldes dependency injection, og det gør at man kan bruge service-laget i controlleren.
         public ExercisesController(
             IExerciseService exerciseService)
         {
