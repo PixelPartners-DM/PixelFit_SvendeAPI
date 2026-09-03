@@ -11,6 +11,7 @@ namespace PixelFit_SvendeAPI.Controllers
     [Route("api/[controller]")]
     public class NutritionController : ControllerBase
     {
+        // Dependency injection of the INutritionService
         private readonly INutritionService _nutritionService;
 
         public NutritionController(
