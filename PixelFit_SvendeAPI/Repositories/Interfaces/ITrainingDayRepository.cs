@@ -18,5 +18,9 @@ namespace PixelFit_SvendeAPI.Repositories.Interfaces
 
         // Sletter en træningsdag
         Task<bool> DeleteAsync(int id);
+
+        // Tjekker om brugeren allerede har en træningsdag
+        // med den angivne ugedag. excludeId kan bruges ved update.
+        Task<bool> AnyDayForUserWithNameAsync(WeekDay dayName, int userId, int? excludeId = null);
     }
 }

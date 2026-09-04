@@ -15,17 +15,14 @@ namespace PixelFit_SvendeAPI.Repositories
             _context = context;
         }
 
-
         // Henter alle træningsdage som tilhører et bestemt program
-        public async Task<IEnumerable<TrainingDay>> GetByProgramIdAsync(
-            int trainingProgramId)
+        public async Task<IEnumerable<TrainingDay>> GetByProgramIdAsync(int trainingProgramId)
         {
             return await _context.TrainingDays
                 .Where(day => day.TrainingProgramId == trainingProgramId)
                 .AsNoTracking()
                 .ToListAsync();
         }
-
 
         // Henter én bestemt træningsdag ud fra id
         public async Task<TrainingDay?> GetByIdAsync(int id)
@@ -34,47 +31,54 @@ namespace PixelFit_SvendeAPI.Repositories
                 .FirstOrDefaultAsync(day => day.Id == id);
         }
 
-
         // Opretter en ny træningsdag
-        public async Task<TrainingDay> AddAsync(
-            TrainingDay trainingDay)
+        public async Task<TrainingDay> AddAsync(TrainingDay trainingDay)
         {
             await _context.TrainingDays.AddAsync(trainingDay);
-
             await _context.SaveChangesAsync();
 
             return trainingDay;
         }
-
 
         // Opdaterer en eksisterende træningsdag
-        public async Task<TrainingDay> UpdateAsync(
-            TrainingDay trainingDay)
+        public async Task<TrainingDay> UpdateAsync(TrainingDay trainingDay)
         {
             _context.TrainingDays.Update(trainingDay);
-
             await _context.SaveChangesAsync();
 
             return trainingDay;
         }
-
 
         // Sletter en træningsdag
         public async Task<bool> DeleteAsync(int id)
         {
-            var trainingDay =
-                await _context.TrainingDays.FindAsync(id);
+            var trainingDay = await _context.TrainingDays.FindAsync(id);
 
             if (trainingDay == null)
-            {
                 return false;
-            }
 
             _context.TrainingDays.Remove(trainingDay);
-
             await _context.SaveChangesAsync();
 
             return true;
+        }
+
+        // Tjekker om brugeren allerede har en træningsdag
+        // med den angivne ugedag. excludeId kan bruges ved update.
+        public async Task<bool> AnyDayForUserWithNameAsync(WeekDay dayName, int userId, int? excludeId = null)
+        {
+            var daysQuery = _context.TrainingDays.AsQueryable();
+
+            if (excludeId.HasValue)
+            {
+                daysQuery = daysQuery.Where(d => d.Id != excludeId.Value);
+            }
+
+            return await daysQuery.AnyAsync(day =>
+                day.DayName == dayName &&
+                _context.TrainingPrograms.Any(tp =>
+                    tp.Id == day.TrainingProgramId &&
+                    tp.UserId == userId));
         }
     }
 }

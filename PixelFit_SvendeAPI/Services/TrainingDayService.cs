@@ -9,20 +9,16 @@ namespace PixelFit_SvendeAPI.Services
         private readonly ITrainingDayRepository _repository;
 
         // Får repository gennem Dependency Injection
-        public TrainingDayService(
-            ITrainingDayRepository repository)
+        public TrainingDayService(ITrainingDayRepository repository)
         {
             _repository = repository;
         }
 
-
         // Henter alle træningsdage for et bestemt program
-        public Task<IEnumerable<TrainingDay>> GetByProgramIdAsync(
-            int trainingProgramId)
+        public Task<IEnumerable<TrainingDay>> GetByProgramIdAsync(int trainingProgramId)
         {
             return _repository.GetByProgramIdAsync(trainingProgramId);
         }
-
 
         // Henter én bestemt træningsdag
         public Task<TrainingDay?> GetByIdAsync(int id)
@@ -30,27 +26,29 @@ namespace PixelFit_SvendeAPI.Services
             return _repository.GetByIdAsync(id);
         }
 
-
         // Opretter en ny træningsdag
-        public Task<TrainingDay> CreateAsync(
-            TrainingDay trainingDay)
+        public Task<TrainingDay> CreateAsync(TrainingDay trainingDay)
         {
             return _repository.AddAsync(trainingDay);
         }
 
-
         // Opdaterer en træningsdag
-        public Task<TrainingDay> UpdateAsync(
-            TrainingDay trainingDay)
+        public Task<TrainingDay> UpdateAsync(TrainingDay trainingDay)
         {
             return _repository.UpdateAsync(trainingDay);
         }
-
 
         // Sletter en træningsdag
         public Task<bool> DeleteAsync(int id)
         {
             return _repository.DeleteAsync(id);
+        }
+
+        // Tjekker om brugeren allerede har en træningsdag
+        // med den angivne ugedag. excludeId kan bruges ved update.
+        public Task<bool> DayAlreadyExistsForUserAsync(WeekDay dayName, int userId, int? excludeId = null)
+        {
+            return _repository.AnyDayForUserWithNameAsync(dayName, userId, excludeId);
         }
     }
 }
