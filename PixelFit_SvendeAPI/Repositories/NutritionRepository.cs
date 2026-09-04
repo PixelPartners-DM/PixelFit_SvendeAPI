@@ -14,8 +14,18 @@ namespace PixelFit_SvendeAPI.Repositories
             _context = context;
         }
 
+
+        /// Hent alle måltider for en bruger inden for et givet datointerval.
+        /// "userId" Brugerens unikke ID.
+        /// "from" Startdato for intervallet (inklusiv).
+        /// "to" Slutdato for intervallet (eksklusiv).
+        /// En liste af måltider inden for det specificerede datointerval bliver returneret, sorteret efter dato.
+        /// Hvert måltid inkluderer relaterede FoodItems.
+        // Eager-load'er relaterede FoodItems, filtrerer på bruger og dato, sorterer og returnerer som liste.
         public async Task<List<Meal>> GetMealsForDateRangeAsync(int userId, DateTime from, DateTime to)
         {
+            // Eager-load Items; filtrer på bruger og datointerval (from inkl., to ekskl.);
+            // sorter efter dato og udfør som read-only med AsNoTracking.
             return await _context.Meals
                 .Include(m => m.Items)
                 .Where(m => m.UserId == userId && m.Date >= from && m.Date < to)

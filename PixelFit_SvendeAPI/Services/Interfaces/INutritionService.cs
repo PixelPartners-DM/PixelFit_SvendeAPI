@@ -5,7 +5,7 @@ namespace PixelFit_SvendeAPI.Services.Interfaces
 {
     public interface INutritionService
     {
-        // Returns: computed DailyNutritionSummary, the user's DailyCalorieGoal, and the list of meals for today
+        // Returnerer: computed DailyNutritionSummary, brugerens DailyCalorieGoal og listen over måltider for i dag
         Task<(DailyNutritionSummary Summary, int DailyCalorieGoal, List<Meal> Meals)> GetTodayAsync(int userId);
 
         Task<Meal> CreateMealAsync(int userId, CreateMealRequest request);

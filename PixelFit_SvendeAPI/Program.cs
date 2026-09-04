@@ -235,18 +235,22 @@ builder.Services.AddScoped<
     IExerciseSetService,
     ExerciseSetService>();
 
+// Repository til kost
 builder.Services.AddScoped<
     INutritionRepository,
     NutritionRepository>();
 
+// Service til kost
 builder.Services.AddScoped<
     INutritionService,
     NutritionService>();
 
+// Repository til Brugerprofiler
 builder.Services.AddScoped<
     IUserProfileRepository,
     UserProfileRepository>();
 
+// Service til Brugerprofiler
 builder.Services.AddScoped<
     IUserProfileService,
     UserProfileService>();
