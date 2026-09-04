@@ -243,6 +243,14 @@ builder.Services.AddScoped<
     INutritionService,
     NutritionService>();
 
+builder.Services.AddScoped<
+    IUserProfileRepository,
+    UserProfileRepository>();
+
+builder.Services.AddScoped<
+    IUserProfileService,
+    UserProfileService>();
+
 builder.Services.AddScoped<JwtService>();
 
 builder.Services.AddHttpClient<IDiscordWebhookService, DiscordWebhookService>();

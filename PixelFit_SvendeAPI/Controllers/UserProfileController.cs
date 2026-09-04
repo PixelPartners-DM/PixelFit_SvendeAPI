@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using PixelFit_SvendeAPI.Data;
 using PixelFit_SvendeAPI.DTOS;
 using PixelFit_SvendeAPI.Models;
+using PixelFit_SvendeAPI.Services.Interfaces;
 using System.Security.Claims;
 
 namespace PixelFit_SvendeAPI.Controllers
@@ -13,15 +12,13 @@ namespace PixelFit_SvendeAPI.Controllers
     [Route("api/[controller]")]
     public class UserProfileController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IUserProfileService _profileService;
 
         public UserProfileController(
-            ApplicationDbContext context)
+            IUserProfileService profileService)
         {
-            _context = context;
+            _profileService = profileService;
         }
-
-
 
         private int GetUserId()
         {
@@ -33,160 +30,52 @@ namespace PixelFit_SvendeAPI.Controllers
             return int.Parse(userId!);
         }
 
-
-
         [HttpGet("me")]
         public async Task<IActionResult> GetMyProfile()
         {
-            var userId =
-                GetUserId();
+            var userId = GetUserId();
 
-
-            var profile =
-                await _context.UserProfiles
-                    .FirstOrDefaultAsync(
-                        x => x.UserId == userId
-                    );
-
+            var profile = await _profileService.GetByUserIdAsync(userId);
 
             if (profile == null)
             {
                 return NotFound(new
                 {
-                    message =
-                        "Der findes endnu ingen brugerprofil."
+                    message = "Der findes endnu ingen brugerprofil."
                 });
             }
-
 
             return Ok(new
             {
                 profile.Id,
-
                 profile.Gender,
-
                 profile.Age,
-
                 profile.Height,
-
                 profile.Weight,
-
                 profile.ActivityLevel,
-
                 profile.BMR,
-
                 profile.TDEE,
-
                 profile.DailyCalorieGoal
             });
         }
 
-
-
         [HttpPut("me")]
-        public async Task<IActionResult> SaveMyProfile(
-            [FromBody] SaveUserProfileDto dto)
+        public async Task<IActionResult> SaveMyProfile([FromBody] SaveUserProfileDto dto)
         {
-            var userId =
-                GetUserId();
+            var userId = GetUserId();
 
-
-            var profile =
-                await _context.UserProfiles
-                    .FirstOrDefaultAsync(
-                        x => x.UserId == userId
-                    );
-
-
-            if (profile == null)
-            {
-                profile =
-                    new UserProfile
-                    {
-                        UserId =
-                            userId,
-
-                        Gender =
-                            dto.Gender,
-
-                        Age =
-                            dto.Age,
-
-                        Height =
-                            dto.Height,
-
-                        Weight =
-                            dto.Weight,
-
-                        ActivityLevel =
-                            dto.ActivityLevel,
-
-                        BMR =
-                            dto.BMR,
-
-                        TDEE =
-                            dto.TDEE,
-
-                        DailyCalorieGoal =
-                            dto.DailyCalorieGoal
-                    };
-
-
-                await _context.UserProfiles.AddAsync(
-                    profile
-                );
-            }
-
-
-            else
-            {
-                profile.Gender =
-                    dto.Gender;
-
-                profile.Age =
-                    dto.Age;
-
-                profile.Height =
-                    dto.Height;
-
-                profile.Weight =
-                    dto.Weight;
-
-                profile.ActivityLevel =
-                    dto.ActivityLevel;
-
-                profile.BMR =
-                    dto.BMR;
-
-                profile.TDEE =
-                    dto.TDEE;
-
-                profile.DailyCalorieGoal =
-                    dto.DailyCalorieGoal;
-            }
-
-
-            await _context.SaveChangesAsync();
-
+            var profile = await _profileService.SaveAsync(userId, dto);
 
             return Ok(new
             {
                 profile.Id,
-
                 profile.Gender,
-
                 profile.Age,
-
                 profile.Height,
-
                 profile.Weight,
-
                 profile.ActivityLevel,
-
                 profile.BMR,
-
                 profile.TDEE,
-
                 profile.DailyCalorieGoal
             });
         }
